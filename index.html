@@ -379,7 +379,7 @@
     <div class="price-pill glass">
       <div>
         <div class="label">ราคารถ</div>
-        <div class="value">฿849,780</div>
+        <div class="value" id="carPriceHeader">฿0</div>
       </div>
     </div>
   </div>
@@ -393,9 +393,8 @@
       <div class="ring-track">
         <div class="ring-fill" id="ringFill"></div>
       </div>
-      <div class="ring-marks">
-        <span>งวด 0</span><span>15</span><span>30</span><span>45</span><span>60</span>
-      </div>
+      <div class="ring-marks" id="ringMarksLabels">
+        </div>
     </div>
 
     <div class="hero-stats">
@@ -428,8 +427,8 @@
     <div class="chart-head">
       <div class="h">ยอดคงเหลือลดลงตามเวลา</div>
       <div class="chart-now">
-        <div class="v">฿566,520</div>
-        <div class="l">คงเหลือ ณ งวดที่ 20</div>
+        <div class="v" id="chartCurrentBalance">฿0</div>
+        <div class="l" id="chartCurrentLabel">คงเหลือ ณ งวดปัจจุบัน</div>
       </div>
     </div>
     <div class="chart-svg-wrap">
@@ -457,8 +456,8 @@
       <div id="hoverTooltip"></div>
     </div>
     <div class="legend-row">
-      <div class="legend-item"><div class="legend-line" style="background: var(--green);"></div> จ่ายแล้ว (งวด 1–20)</div>
-      <div class="legend-item"><div class="legend-line" style="background: var(--orange); opacity:0.7;"></div> คาดการณ์ (งวด 21–60)</div>
+      <div class="legend-item"><div class="legend-line" style="background: var(--green);"></div> จ่ายแล้ว (งวดปัจจุบัน)</div>
+      <div class="legend-item"><div class="legend-line" style="background: var(--orange); opacity:0.7;"></div> คาดการณ์ (อนาคต)</div>
       <div class="legend-item">เลื่อนเมาส์บนกราฟเพื่อดูรายละเอียดแต่ละงวด</div>
     </div>
   </div>
@@ -466,61 +465,115 @@
   <div class="grid">
     <div class="card glass fade-in" style="animation-delay: 0.25s;">
       <div class="k">งวดปัจจุบัน</div>
-      <div class="v">20 / 60</div>
-      <div class="sub">25/06/2026</div>
+      <div class="v" id="cardPeriod">0 / 0</div>
+      <div class="sub" id="cardDateText">Live Update</div>
     </div>
     <div class="card glass fade-in" style="animation-delay: 0.3s;">
       <div class="k">ค่าผ่อน/เดือน</div>
-      <div class="v" style="color: var(--cyan);">฿14,163</div>
-      <div class="sub">งวดสุดท้าย ฿14,123</div>
+      <div class="v" id="cardPayment" style="color: var(--cyan);">฿0</div>
+      <div class="sub" id="cardLastPayment">งวดสุดท้าย ฿0</div>
     </div>
     <div class="card glass fade-in" style="animation-delay: 0.35s;">
       <div class="k">% ที่จ่ายแล้ว</div>
-      <div class="v" style="color: var(--green);">33.3%</div>
+      <div class="v" id="cardPctText" style="color: var(--green);">0%</div>
       <div class="sub">ของราคารถทั้งหมด</div>
     </div>
     <div class="card glass fade-in" style="animation-delay: 0.4s;">
       <div class="k">เหลืออีก</div>
-      <div class="v" style="color: var(--violet);">40 งวด</div>
-      <div class="sub">ครบกำหนด ~05/2029</div>
+      <div class="v" id="cardRemainPeriod" style="color: var(--violet);">0 งวด</div>
+      <div class="sub">คํานวณตามสัญญา</div>
     </div>
   </div>
 
   <div class="timeline-glass glass fade-in" style="animation-delay: 0.45s;">
     <div class="timeline-head">
       <div class="h">เส้นทางสู่การปลดหนี้</div>
-      <div class="v">เริ่ม 30/11/2023</div>
+      <div class="v" id="contractStartDate">ดึงข้อมูลอัตโนมัติ</div>
     </div>
     <div class="milestone-track" id="milestoneTrack">
       <div class="milestone-fill" id="milestoneFill"></div>
     </div>
   </div>
 
-  <div class="footnote fade-in" style="animation-delay: 0.5s;">ข้อมูลจากชีต "Ford Everest Sport" · กราฟแนวโน้มคำนวณแบบเส้นตรงจากค่าผ่อนคงที่ ฿14,163/งวด</div>
+  <div class="footnote fade-in" style="animation-delay: 0.5s;" id="footerText">ข้อมูลซิงค์จากระบบ Excel Online ตลอด 24 ชม.</div>
 
 </div>
 
 <script>
-  // ---- data ----
-  const total = 60;
-  const paid = 20;
-  const payment = 14163;
-  const lastPayment = 14123;
-  const price = 849780;
-  const paidAmount = 283260;
-  const remainAmount = 566520;
-  const progressPct = (paid/total*100);
+  // ==========================================
+  // CONFIGURATION: ใส่ลิงก์ข้อมูล CSV ของคุณที่นี่
+  // ==========================================
+  const excelCsvUrl = "ใส่ลิงก์_CSV_ตรงนี้"; 
 
-  const balances = [];
-  for (let i = 0; i <= total; i++) {
-    let paidSoFar = i === total ? (payment * (total - 1) + lastPayment) : payment * i;
-    balances.push(Math.max(price - paidSoFar, 0));
-  }
-
-  // payment dates for first 20 (real) periods
+  // payment dates สำหรับจำลองการแสดงผล (สามารถขยายเพิ่มในโค้ดหรือดึงจากชีตเพิ่มได้)
   const dates = ['30/11/2023','28/12/2023','26/01/2024','28/02/2024','26/03/2024','25/04/2024','26/05/2024','25/06/2024','25/07/2024','25/08/2024','25/09/2024','25/10/2025','25/11/2025','25/12/2025','25/01/2026','25/02/2026','25/03/2026','25/04/2026','27/05/2026','25/06/2026'];
 
-  // ---- animated counters ----
+  // ฟังก์ชันหลักดึงข้อมูลจาก Excel
+  async function loadExcelData() {
+    try {
+      const response = await fetch(excelCsvUrl);
+      if (!response.ok) throw new Error("Network response was not ok");
+      const dataText = await response.text();
+      
+      // แปลงข้อมูล CSV บรรทัดแรก
+      const rows = dataText.split('\n');
+      const dataCells = rows[0].split(',');
+
+      // แมปตัวแปรหลักจากตำแหน่งคอลัมน์ใน Excel
+      const paid = parseInt(dataCells[0]) || 0;          // A1
+      const total = parseInt(dataCells[1]) || 60;        // B1
+      const payment = parseFloat(dataCells[2]) || 0;     // C1
+      const lastPayment = parseFloat(dataCells[3]) || 0; // D1
+      const price = parseFloat(dataCells[4]) || 0;       // E1
+
+      // คำนวณตัวเลขแวดล้อม
+      const paidAmount = paid === total ? (payment * (total - 1) + lastPayment) : payment * paid;
+      const remainAmount = Math.max(price - paidAmount, 0);
+      const progressPct = (paid / total * 100);
+
+      // คำนวณยอดลดลงในแต่ละงวดเก็บลง Array
+      const balances = [];
+      for (let i = 0; i <= total; i++) {
+        let paidSoFar = i === total ? (payment * (total - 1) + lastPayment) : payment * i;
+        balances.push(Math.max(price - paidSoFar, 0));
+      }
+
+      // เริ่มทำงานส่วนประกอบหน้าแดชบอร์ด
+      updateStaticUI(paid, total, payment, lastPayment, price, paidAmount, remainAmount, progressPct);
+      initDashboardAnimations(paidAmount, remainAmount, progressPct);
+      buildSVGTrendChart(paid, total, price, balances);
+      buildMilestones(paid, total, progressPct);
+
+    } catch (error) {
+      console.error("ไม่สามารถโหลดข้อมูลจาก Excel ได้:", error);
+      document.getElementById('footerText').textContent = "⚠️ ไม่สามารถเชื่อมต่อกับ Excel Online ได้ กรุณาตรวจสอบสิทธิ์การแชร์ลิงก์";
+    }
+  }
+
+  // ฟังก์ชันอัปเดตตัวเลข Text ในหน้าเว็บ
+  function updateStaticUI(paid, total, payment, lastPayment, price, paidAmount, remainAmount, progressPct) {
+    document.getElementById('carPriceHeader').textContent = '฿' + price.toLocaleString();
+    document.getElementById('chartCurrentBalance').textContent = '฿' + remainAmount.toLocaleString();
+    document.getElementById('chartCurrentLabel').textContent = `คงเหลือ ณ งวดที่ ${paid}`;
+    document.getElementById('cardPeriod').textContent = `${paid} / ${total}`;
+    document.getElementById('cardPayment').textContent = '฿' + payment.toLocaleString();
+    document.getElementById('cardLastPayment').textContent = `งวดสุดท้าย ฿${lastPayment.toLocaleString()}`;
+    document.getElementById('cardPctText').textContent = progressPct.toFixed(1) + '%';
+    document.getElementById('cardRemainPeriod').textContent = `${total - paid} งวด`;
+    if(dates[paid-1]) {
+      document.getElementById('cardDateText').textContent = dates[paid-1];
+    }
+    
+    // สร้างสเกลบอกงวดในวง Progress bar
+    const ringMarks = document.getElementById('ringMarksLabels');
+    ringMarks.innerHTML = `<span>งวด 0</span>
+                           <span>${Math.round(total*0.25)}</span>
+                           <span>${Math.round(total*0.5)}</span>
+                           <span>${Math.round(total*0.75)}</span>
+                           <span>${total}</span>`;
+  }
+
+  // ฟังก์ชันทำตัวเลขวิ่งและหลอดโหลดขยับ (Animation)
   function animateNumber(el, target, duration, prefix) {
     const start = performance.now();
     function tick(now) {
@@ -533,13 +586,14 @@
     requestAnimationFrame(tick);
   }
 
-  window.addEventListener('load', () => {
+  function initDashboardAnimations(paidAmount, remainAmount, progressPct) {
     animateNumber(document.getElementById('paidNum'), paidAmount, 1400, '฿');
     animateNumber(document.getElementById('remainNum'), remainAmount, 1400, '฿');
 
     const heroPct = document.getElementById('heroPct');
     const ringFill = document.getElementById('ringFill');
     setTimeout(() => { ringFill.style.width = progressPct + '%'; }, 150);
+    
     let pctStart = performance.now();
     function pctTick(now) {
       const t = Math.min((now - pctStart) / 1400, 1);
@@ -552,132 +606,152 @@
     setTimeout(() => {
       document.getElementById('milestoneFill').style.width = progressPct + '%';
     }, 200);
-  });
-
-  // ---- build SVG trend chart ----
-  const svg = document.getElementById('trendChart');
-  const W = 900, H = 340;
-  const padL = 64, padR = 16, padT = 20, padB = 34;
-  const plotW = W - padL - padR;
-  const plotH = H - padT - padB;
-
-  const xFor = (i) => padL + (i / total) * plotW;
-  const yFor = (bal) => padT + (1 - bal / price) * plotH;
-
-  let svgContent = '';
-
-  const yTicks = [0, 200000, 400000, 600000, 800000];
-  yTicks.forEach(val => {
-    const y = yFor(val);
-    svgContent += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
-    svgContent += `<text x="${padL - 10}" y="${y + 4}" text-anchor="end" font-family="Space Grotesk, sans-serif" font-size="11" fill="#4B5263">${(val/1000).toFixed(0)}k</text>`;
-  });
-
-  for (let i = 0; i <= total; i += 10) {
-    const x = xFor(i);
-    svgContent += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${H-padB}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>`;
-    svgContent += `<text x="${x}" y="${H-padB+18}" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" fill="#4B5263">${i === 0 ? 'เริ่ม' : i}</text>`;
   }
 
-  let pathD = `M ${xFor(0)} ${yFor(balances[0])}`;
-  for (let i = 1; i <= total; i++) pathD += ` L ${xFor(i)} ${yFor(balances[i])}`;
-  let areaD = pathD + ` L ${xFor(total)} ${H-padB} L ${xFor(0)} ${H-padB} Z`;
-  svgContent += `<path d="${areaD}" fill="url(#areaGrad)"/>`;
+  // ฟังก์ชันวาดกราฟเส้นหนี้สิน (SVG)
+  function buildSVGTrendChart(paid, total, price, balances) {
+    const svg = document.getElementById('trendChart');
+    const W = 900, H = 340;
+    const padL = 64, padR = 16, padT = 20, padB = 34;
+    const plotW = W - padL - padR;
+    const plotH = H - padT - padB;
 
-  let paidPathD = `M ${xFor(0)} ${yFor(balances[0])}`;
-  for (let i = 1; i <= paid; i++) paidPathD += ` L ${xFor(i)} ${yFor(balances[i])}`;
-  let projPathD = `M ${xFor(paid)} ${yFor(balances[paid])}`;
-  for (let i = paid + 1; i <= total; i++) projPathD += ` L ${xFor(i)} ${yFor(balances[i])}`;
+    const xFor = (i) => padL + (i / total) * plotW;
+    const yFor = (bal) => padT + (1 - bal / price) * plotH;
 
-  svgContent += `<path d="${projPathD}" fill="none" stroke="#FF8A4D" stroke-width="3" stroke-dasharray="6 5" opacity="0.6"/>`;
-  // glow layer (wide, blurred via stdDeviation small + opacity) behind main stroke
-  svgContent += `<path d="${paidPathD}" fill="none" stroke="#4DE8FF" stroke-width="9" opacity="0.25" filter="blur(4px)"/>`;
-  svgContent += `<path d="${paidPathD}" fill="none" stroke="url(#lineGradMain)" stroke-width="3.5"/>`;
+    let svgContent = '';
 
-  // invisible hover targets for every period
-  for (let i = 0; i <= total; i++) {
-    const x = xFor(i), y = yFor(balances[i]);
-    const isPaidPoint = i <= paid;
-    const isCurrent = i === paid;
-    if (i % 5 === 0 || isCurrent || i === total) {
-      const color = isCurrent ? '#FF8A4D' : (isPaidPoint ? '#4DFFB0' : '#5A6678');
-      const r = isCurrent ? 6 : 4;
-      svgContent += `<circle cx="${x}" cy="${y}" r="${r}" fill="${color}" stroke="#0A0E16" stroke-width="2"/>`;
-      if (isCurrent) {
-        svgContent += `<circle cx="${x}" cy="${y}" r="11" fill="none" stroke="#FF8A4D" stroke-width="1.5" opacity="0.5"/>`;
-        svgContent += `<text x="${x}" y="${y - 20}" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="12" fill="#F2F4F8">วันนี้</text>`;
-      }
-    }
-    // invisible larger hit area for every single period
-    svgContent += `<circle class="hover-target" data-i="${i}" data-bal="${balances[i]}" cx="${x}" cy="${y}" r="10" fill="transparent" style="cursor:pointer;"/>`;
-  }
-
-  svg.innerHTML = svgContent;
-
-  // ---- hover tooltip ----
-  const tooltip = document.getElementById('hoverTooltip');
-  const chartWrap = document.querySelector('.chart-svg-wrap');
-  const targets = svg.querySelectorAll('.hover-target');
-
-  targets.forEach(t => {
-    t.addEventListener('mouseenter', (e) => {
-      const i = parseInt(t.getAttribute('data-i'));
-      const bal = parseFloat(t.getAttribute('data-bal'));
-      const rect = svg.getBoundingClientRect();
-      const wrapRect = chartWrap.getBoundingClientRect();
-      const cx = parseFloat(t.getAttribute('cx'));
-      const cy = parseFloat(t.getAttribute('cy'));
-      const scaleX = rect.width / W;
-      const scaleY = rect.height / H;
-      const px = (rect.left - wrapRect.left) + cx * scaleX;
-      const py = (rect.top - wrapRect.top) + cy * scaleY;
-
-      const dateLabel = i <= paid && i > 0 ? dates[i-1] : (i === 0 ? 'เริ่มต้นสัญญา' : 'คาดการณ์');
-      const statusLabel = i <= paid ? 'จ่ายแล้ว' : 'คาดการณ์';
-
-      tooltip.innerHTML = `<div class="tt-period">งวด ${i} · ${dateLabel}</div><div class="tt-val">฿${Math.round(bal).toLocaleString('en-US')}</div><div class="tt-period">${statusLabel}</div>`;
-      tooltip.style.left = px + 'px';
-      tooltip.style.top = py + 'px';
-      tooltip.style.opacity = '1';
+    // เส้นและตัวเลขแนวนอน (Y-Axis Ticks)
+    const yTicks = [0, price * 0.25, price * 0.5, price * 0.75, price];
+    yTicks.forEach(val => {
+      const y = yFor(val);
+      svgContent += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>`;
+      svgContent += `<text x="${padL - 10}" y="${y + 4}" text-anchor="end" font-family="Space Grotesk, sans-serif" font-size="11" fill="#4B5263">${(val/1000).toFixed(0)}k</text>`;
     });
-    t.addEventListener('mouseleave', () => { tooltip.style.opacity = '0'; });
-  });
 
-  // ---- milestone markers ----
-  const track = document.getElementById('milestoneTrack');
-  const milestones = [
-    { pct: 0, label: 'เริ่มต้น', sub: 'งวด 1', below: true },
-    { pct: 25, label: '25%', sub: 'งวด 15', below: false },
-    { pct: 50, label: '50%', sub: 'งวด 30', below: true },
-    { pct: 75, label: '75%', sub: 'งวด 45', below: false },
-    { pct: 100, label: 'ปลดหนี้', sub: 'งวด 60', below: true }
-  ];
-  const currentPct = progressPct;
+    // เส้นแนวตั้งแบ่งงวด (X-Axis)
+    const step = total > 12 ? Math.round(total / 6) : 1;
+    for (let i = 0; i <= total; i += step) {
+      const x = xFor(i);
+      svgContent += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${H-padB}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>`;
+      svgContent += `<text x="${x}" y="${H-padB+18}" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" fill="#4B5263">${i === 0 ? 'เริ่ม' : i}</text>`;
+    }
 
-  milestones.forEach((m) => {
-    const pt = document.createElement('div');
-    pt.className = 'milestone-pt' + (m.pct <= currentPct ? ' done' : '');
-    pt.style.left = m.pct + '%';
-    track.appendChild(pt);
+    // วาดเงาใต้กราฟ (Area fill)
+    let pathD = `M ${xFor(0)} ${yFor(balances[0])}`;
+    for (let i = 1; i <= total; i++) pathD += ` L ${xFor(i)} ${yFor(balances[i])}`;
+    let areaD = pathD + ` L ${xFor(total)} ${H-padB} L ${xFor(0)} ${H-padB} Z`;
+    svgContent += `<path d="${areaD}" fill="url(#areaGrad)"/>`;
 
-    const label = document.createElement('div');
-    label.className = 'milestone-label' + (m.below ? ' below' : '');
-    label.style.left = m.pct + '%';
-    label.innerHTML = `<span class="pct">${m.label}</span>${m.sub}`;
-    track.appendChild(label);
-  });
+    // เส้นคาดการณ์อนาคต (Dotted line)
+    let projPathD = `M ${xFor(paid)} ${yFor(balances[paid])}`;
+    for (let i = paid + 1; i <= total; i++) projPathD += ` L ${xFor(i)} ${yFor(balances[i])}`;
+    svgContent += `<path d="${projPathD}" fill="none" stroke="#FF8A4D" stroke-width="3" stroke-dasharray="6 5" opacity="0.6"/>`;
 
-  const nowPt = document.createElement('div');
-  nowPt.className = 'milestone-pt now';
-  nowPt.style.left = currentPct + '%';
-  track.appendChild(nowPt);
+    // เส้นหนี้คงเหลือที่จ่ายแล้ว (Solid Glow line)
+    let paidPathD = `M ${xFor(0)} ${yFor(balances[0])}`;
+    for (let i = 1; i <= paid; i++) paidPathD += ` L ${xFor(i)} ${yFor(balances[i])}`;
+    svgContent += `<path d="${paidPathD}" fill="none" stroke="#4DE8FF" stroke-width="9" opacity="0.25" filter="blur(4px)"/>`;
+    svgContent += `<path d="${paidPathD}" fill="none" stroke="url(#lineGradMain)" stroke-width="3.5"/>`;
 
-  const nowLabel = document.createElement('div');
-  nowLabel.className = 'milestone-label';
-  nowLabel.style.left = currentPct + '%';
-  nowLabel.style.top = '-50px';
-  nowLabel.innerHTML = `<span class="pct" style="color: var(--orange);">ปัจจุบัน</span>งวด ${paid}`;
-  track.appendChild(nowLabel);
+    // จุดตัดและสร้าง Hover Target สำหรับเปิด Tooltip ตัวเลขแต่ละงวด
+    for (let i = 0; i <= total; i++) {
+      const x = xFor(i), y = yFor(balances[i]);
+      const isPaidPoint = i <= paid;
+      const isCurrent = i === paid;
+      
+      if (i % step === 0 || isCurrent || i === total) {
+        const color = isCurrent ? '#FF8A4D' : (isPaidPoint ? '#4DFFB0' : '#5A6678');
+        const r = isCurrent ? 6 : 4;
+        svgContent += `<circle cx="${x}" cy="${y}" r="${r}" fill="${color}" stroke="#0A0E16" stroke-width="2"/>`;
+        if (isCurrent) {
+          svgContent += `<circle cx="${x}" cy="${y}" r="11" fill="none" stroke="#FF8A4D" stroke-width="1.5" opacity="0.5"/>`;
+          svgContent += `<text x="${x}" y="${y - 20}" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-weight="600" font-size="12" fill="#F2F4F8">วันนี้</text>`;
+        }
+      }
+      svgContent += `<circle class="hover-target" data-i="${i}" data-bal="${balances[i]}" cx="${x}" cy="${y}" r="10" fill="transparent" style="cursor:pointer;"/>`;
+    }
+
+    svg.innerHTML = svgContent;
+    bindTooltipEvents(paid);
+  }
+
+  // ฟังก์ชันควบคุมเปิดปิดกล่องคำอธิบายข้อมูลยอดเงินเมื่อส่องเมาส์ (Tooltip)
+  function bindTooltipEvents(paid) {
+    const tooltip = document.getElementById('hoverTooltip');
+    const chartWrap = document.querySelector('.chart-svg-wrap');
+    const targets = document.querySelectorAll('.hover-target');
+
+    targets.forEach(t => {
+      t.addEventListener('mouseenter', (e) => {
+        const i = parseInt(t.getAttribute('data-i'));
+        const bal = parseFloat(t.getAttribute('data-bal'));
+        const svg = document.getElementById('trendChart');
+        const rect = svg.getBoundingClientRect();
+        const wrapRect = chartWrap.getBoundingClientRect();
+        const cx = parseFloat(t.getAttribute('cx'));
+        const cy = parseFloat(t.getAttribute('cy'));
+        const scaleX = rect.width / 900;
+        const scaleY = rect.height / 340;
+        const px = (rect.left - wrapRect.left) + cx * scaleX;
+        const py = (rect.top - wrapRect.top) + cy * scaleY;
+
+        const dateLabel = i <= paid && i > 0 ? (dates[i-1] || '') : (i === 0 ? 'เริ่มต้นสัญญา' : 'คาดการณ์อนาคต');
+        const statusLabel = i <= paid ? 'จ่ายแล้ว' : 'ยอดคาดการณ์';
+
+        tooltip.innerHTML = `<div class="tt-period">งวด ${i} · ${dateLabel}</div><div class="tt-val">฿${Math.round(bal).toLocaleString('en-US')}</div><div class="tt-period">${statusLabel}</div>`;
+        tooltip.style.left = px + 'px';
+        tooltip.style.top = py + 'px';
+        tooltip.style.opacity = '1';
+      });
+      t.addEventListener('mouseleave', () => { tooltip.style.opacity = '0'; });
+    });
+  }
+
+  // ฟังก์ชันสร้างจุดหมุดหมายไทม์ไลน์ปลดหนี้ (Timeline Milestone)
+  function buildMilestones(paid, total, currentPct) {
+    const track = document.getElementById('milestoneTrack');
+    
+    // ล้างจุดเดิมออกก่อนเพื่อไม่ให้ซ้อนกันเวลารีโหลดข้อมูล
+    const oldPts = track.querySelectorAll('.milestone-pt, .milestone-label');
+    oldPts.forEach(el => el.remove());
+
+    const milestones = [
+      { pct: 0, label: 'เริ่มต้น', sub: 'งวด 1', below: true },
+      { pct: 25, label: '25%', sub: `งวด ${Math.round(total*0.25)}`, below: false },
+      { pct: 50, label: '50%', sub: `งวด ${Math.round(total*0.5)}`, below: true },
+      { pct: 75, label: '75%', sub: `งวด ${Math.round(total*0.75)}`, below: false },
+      { pct: 100, label: 'ปลดหนี้', sub: `งวด ${total}`, below: true }
+    ];
+
+    milestones.forEach((m) => {
+      const pt = document.createElement('div');
+      pt.className = 'milestone-pt' + (m.pct <= currentPct ? ' done' : '');
+      pt.style.left = m.pct + '%';
+      track.appendChild(pt);
+
+      const label = document.createElement('div');
+      label.className = 'milestone-label' + (m.below ? ' below' : '');
+      label.style.left = m.pct + '%';
+      label.innerHTML = `<span class="pct">${m.label}</span>${m.sub}`;
+      track.appendChild(label);
+    });
+
+    const nowPt = document.createElement('div');
+    nowPt.className = 'milestone-pt now';
+    nowPt.style.left = currentPct + '%';
+    track.appendChild(nowPt);
+
+    const nowLabel = document.createElement('div');
+    nowLabel.className = 'milestone-label';
+    nowLabel.style.left = currentPct + '%';
+    nowLabel.style.top = '-50px';
+    nowLabel.innerHTML = `<span class="pct" style="color: var(--orange);">ปัจจุบัน</span>งวด ${paid}`;
+    track.appendChild(nowLabel);
+  }
+
+  // สั่งรันฟังก์ชันดึงข้อมูลดั้งเดิมเมื่อเปิดเบราว์เซอร์
+  window.addEventListener('load', loadExcelData);
 </script>
 
 </body>
