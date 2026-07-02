@@ -5,176 +5,114 @@
 <title>Ford Everest Sport — Loan Intelligence</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap');
-
   :root {
-    --bg-deep: #05070C;
-    --bg-panel: #0A0E16;
-    --glass: rgba(255,255,255,0.04);
-    --glass-border: rgba(255,255,255,0.08);
-    --cyan: #4DE8FF;
-    --violet: #A78BFA;
-    --orange: #FF8A4D;
-    --green: #4DFFB0;
-    --text-hi: #F2F4F8;
-    --text-mid: #8A93A6;
-    --text-low: #4B5263;
+    --bg-deep:#05070C; --glass:rgba(255,255,255,.04); --glass-border:rgba(255,255,255,.08);
+    --cyan:#4DE8FF; --violet:#A78BFA; --orange:#FF8A4D; --green:#4DFFB0;
+    --text-hi:#F2F4F8; --text-mid:#8A93A6; --text-low:#4B5263;
   }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg-deep);
-    color: var(--text-hi);
-    font-family: 'Sarabun', sans-serif;
-    min-height: 100vh;
-    padding: 32px 16px 70px;
-    position: relative;
-    overflow-x: hidden;
-  }
-
-  /* animated mesh */
-  .mesh-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.55; }
-  .blob { position: absolute; border-radius: 50%; filter: blur(80px); }
-  .blob-1 { width:480px; height:480px; background:radial-gradient(circle,rgba(77,232,255,.18),transparent 70%); top:-120px; left:-100px; animation:float1 18s ease-in-out infinite; }
-  .blob-2 { width:520px; height:520px; background:radial-gradient(circle,rgba(167,139,250,.16),transparent 70%); bottom:-160px; right:-120px; animation:float2 22s ease-in-out infinite; }
-  .blob-3 { width:380px; height:380px; background:radial-gradient(circle,rgba(255,138,77,.12),transparent 70%); top:40%; left:50%; animation:float3 26s ease-in-out infinite; }
-  @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(60px,40px)} }
-  @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,-30px)} }
-  @keyframes float3 { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.15)} }
-
-  .wrap { max-width:1020px; margin:0 auto; position:relative; z-index:2; }
-
-  .fade-in { opacity:0; transform:translateY(16px); animation:fadeUp 0.7s cubic-bezier(.16,1,.3,1) forwards; }
-  @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
-
-  .glass {
-    background: var(--glass);
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    position: relative;
-  }
-  .glass::before {
-    content:''; position:absolute; inset:0; border-radius:inherit;
-    background:linear-gradient(135deg,rgba(255,255,255,.06),transparent 40%);
-    pointer-events:none;
-  }
-
-  /* HEADER */
-  .header { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:28px; }
-  .eyebrow { font-family:'Space Grotesk',sans-serif; font-size:11px; letter-spacing:.25em; text-transform:uppercase; color:var(--cyan); font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
-  .pulse-dot { width:6px; height:6px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px var(--cyan); animation:pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-  .title { font-family:'Space Grotesk',sans-serif; font-size:clamp(30px,5vw,42px); font-weight:700; letter-spacing:-.02em; line-height:1.05; background:linear-gradient(135deg,#fff,#b8c2d4); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-  .subtitle { color:var(--text-mid); font-size:14px; margin-top:8px; font-weight:300; }
-  .price-pill { display:flex; align-items:center; gap:10px; padding:10px 18px; border-radius:14px; }
-  .price-pill .label { font-size:11px; color:var(--text-low); text-transform:uppercase; letter-spacing:.08em; }
-  .price-pill .value { font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:600; }
-
-  /* LOADING / ERROR STATE */
-  .loading-state {
-    text-align:center; padding:60px 20px;
-    font-size:15px; color:var(--text-mid);
-  }
-  .spinner {
-    width:36px; height:36px; border:3px solid var(--glass-border);
-    border-top-color:var(--cyan); border-radius:50%;
-    animation:spin 0.8s linear infinite;
-    margin:0 auto 16px;
-  }
-  @keyframes spin { to { transform:rotate(360deg); } }
-
-  /* HERO ROW */
-  .hero-row { display:grid; grid-template-columns:1.3fr 1fr; gap:16px; margin-bottom:16px; }
-  @media(max-width:760px){ .hero-row{grid-template-columns:1fr;} }
-
-  .hero-progress { padding:28px 28px 24px; display:flex; flex-direction:column; justify-content:center; }
-  .progress-top { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:18px; }
-  .progress-top .h { font-family:'Space Grotesk',sans-serif; font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-mid); }
-  .progress-top .pct { font-family:'Space Grotesk',sans-serif; font-size:44px; font-weight:700; background:linear-gradient(135deg,var(--cyan),var(--violet)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; line-height:1; }
-  .ring-track { position:relative; width:100%; height:14px; background:rgba(255,255,255,.06); border-radius:10px; overflow:hidden; }
-  .ring-fill { position:absolute; top:0; left:0; bottom:0; width:0%; background:linear-gradient(90deg,var(--violet),var(--cyan)); border-radius:10px; box-shadow:0 0 20px rgba(77,232,255,.5); transition:width 1.6s cubic-bezier(.16,1,.3,1); }
-  .ring-marks { display:flex; justify-content:space-between; margin-top:8px; }
-  .ring-marks span { font-size:10.5px; color:var(--text-low); font-family:'Space Grotesk',sans-serif; }
-
-  .hero-stats { display:flex; flex-direction:column; gap:12px; }
-  .stat-glass { padding:16px 18px; display:flex; align-items:center; justify-content:space-between; flex:1; }
-  .stat-glass .left { display:flex; align-items:center; gap:12px; }
-  .stat-icon { width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  .stat-icon svg { width:18px; height:18px; }
-  .stat-text .lbl { font-size:11.5px; color:var(--text-mid); }
-  .stat-text .num { font-family:'Space Grotesk',sans-serif; font-size:19px; font-weight:600; margin-top:2px; }
-
-  /* CHART */
-  .chart-glass { padding:26px 24px 18px; margin-bottom:16px; }
-  .chart-head { display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:6px; }
-  .chart-head .h { font-family:'Space Grotesk',sans-serif; font-size:14px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-mid); }
-  .chart-now { text-align:right; }
-  .chart-now .v { font-family:'Space Grotesk',sans-serif; font-size:28px; font-weight:700; color:var(--orange); line-height:1; }
-  .chart-now .l { font-size:11px; color:var(--text-low); text-transform:uppercase; letter-spacing:.06em; }
-  .chart-svg-wrap { width:100%; overflow:visible; margin-top:10px; position:relative; }
-  #hoverTooltip { position:absolute; pointer-events:none; background:rgba(15,18,26,.92); border:1px solid var(--glass-border); backdrop-filter:blur(12px); border-radius:10px; padding:8px 12px; font-size:12px; color:var(--text-hi); transform:translate(-50%,-110%); opacity:0; transition:opacity .15s; white-space:nowrap; font-family:'Space Grotesk',sans-serif; z-index:5; }
-  #hoverTooltip .tt-period { color:var(--text-mid); font-size:10.5px; }
-  #hoverTooltip .tt-val { font-weight:600; }
-  .legend-row { display:flex; gap:22px; flex-wrap:wrap; margin-top:6px; padding-top:16px; border-top:1px solid var(--glass-border); }
-  .legend-item { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--text-mid); }
-  .legend-line { width:18px; height:3px; border-radius:2px; }
-
-  /* CARDS */
-  .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:16px; }
-  @media(max-width:720px){ .grid{grid-template-columns:1fr 1fr;} }
-  .card { padding:18px 16px; transition:transform .25s ease,border-color .25s ease; }
-  .card:hover { transform:translateY(-3px); border-color:rgba(255,255,255,.18); }
-  .card .k { font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-low); margin-bottom:8px; }
-  .card .v { font-family:'Space Grotesk',sans-serif; font-size:21px; font-weight:600; line-height:1.1; }
-  .card .sub { font-size:11.5px; color:var(--text-mid); margin-top:4px; }
-
-  /* TIMELINE */
-  .timeline-glass { padding:22px 26px 30px; margin-bottom:16px; }
-  .timeline-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
-  .timeline-head .h { font-family:'Space Grotesk',sans-serif; font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-mid); }
-  .timeline-head .v { font-size:12px; color:var(--text-low); }
-  .milestone-track { position:relative; height:4px; background:rgba(255,255,255,.07); border-radius:4px; margin:50px 6px 36px; }
-  .milestone-fill { position:absolute; top:0; left:0; bottom:0; border-radius:4px; background:linear-gradient(90deg,var(--violet),var(--cyan)); width:0%; transition:width 1.8s cubic-bezier(.16,1,.3,1); box-shadow:0 0 16px rgba(77,232,255,.45); }
-  .milestone-pt { position:absolute; top:50%; transform:translate(-50%,-50%); width:12px; height:12px; border-radius:50%; background:#1c2230; border:2px solid var(--text-low); }
-  .milestone-pt.done { background:var(--cyan); border-color:var(--cyan); box-shadow:0 0 10px rgba(77,232,255,.6); }
-  .milestone-pt.now { width:18px; height:18px; background:var(--orange); border-color:var(--orange); box-shadow:0 0 0 6px rgba(255,138,77,.18),0 0 14px rgba(255,138,77,.6); animation:nowPulse 2s ease-in-out infinite; }
-  @keyframes nowPulse { 0%,100%{box-shadow:0 0 0 6px rgba(255,138,77,.18),0 0 14px rgba(255,138,77,.6)} 50%{box-shadow:0 0 0 10px rgba(255,138,77,.08),0 0 20px rgba(255,138,77,.8)} }
-  .milestone-label { position:absolute; top:-34px; transform:translateX(-50%); font-size:10px; color:var(--text-low); white-space:nowrap; text-align:center; font-family:'Space Grotesk',sans-serif; }
-  .milestone-label .pct { color:var(--text-mid); font-weight:600; display:block; font-size:12px; margin-bottom:1px; }
-  .milestone-label.below { top:22px; }
-
-  /* PAYMENT TABLE */
-  .table-glass { padding:22px 20px; }
-  .table-head { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:14px; }
-  .table-head .h { font-family:'Space Grotesk',sans-serif; font-size:13px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-mid); }
-  .table-wrap { overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  thead th { font-family:'Space Grotesk',sans-serif; font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-low); padding:8px 10px; border-bottom:1px solid var(--glass-border); text-align:right; }
-  thead th:first-child { text-align:left; }
-  tbody tr { border-bottom:1px solid rgba(255,255,255,.03); transition:background .15s; }
-  tbody tr:hover { background:rgba(255,255,255,.03); }
-  tbody tr.paid-row td { color:var(--text-mid); }
-  tbody tr.current-row td { color:var(--text-hi); }
-  tbody td { padding:7px 10px; text-align:right; font-family:'Space Grotesk',sans-serif; }
-  tbody td:first-child { text-align:left; color:var(--text-mid); }
-  .badge { display:inline-block; padding:2px 8px; border-radius:6px; font-size:10.5px; font-weight:600; }
-  .badge.paid { background:rgba(77,255,176,.12); color:var(--green); }
-  .badge.current { background:rgba(255,138,77,.14); color:var(--orange); }
-  .badge.upcoming { background:rgba(255,255,255,.06); color:var(--text-low); }
-
-  .update-info { text-align:center; font-size:11.5px; color:var(--text-low); margin-top:22px; }
-  .update-info span { color:var(--cyan); }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg-deep);color:var(--text-hi);font-family:'Sarabun',sans-serif;min-height:100vh;padding:32px 16px 70px;overflow-x:hidden}
+  .mesh-bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55}
+  .blob{position:absolute;border-radius:50%;filter:blur(80px)}
+  .blob-1{width:480px;height:480px;background:radial-gradient(circle,rgba(77,232,255,.18),transparent 70%);top:-120px;left:-100px;animation:float1 18s ease-in-out infinite}
+  .blob-2{width:520px;height:520px;background:radial-gradient(circle,rgba(167,139,250,.16),transparent 70%);bottom:-160px;right:-120px;animation:float2 22s ease-in-out infinite}
+  .blob-3{width:380px;height:380px;background:radial-gradient(circle,rgba(255,138,77,.12),transparent 70%);top:40%;left:50%;animation:float3 26s ease-in-out infinite}
+  @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,40px)}}
+  @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,-30px)}}
+  @keyframes float3{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
+  .wrap{max-width:1020px;margin:0 auto;position:relative;z-index:2}
+  .fade-in{opacity:0;transform:translateY(16px);animation:fadeUp .7s cubic-bezier(.16,1,.3,1) forwards}
+  @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+  .glass{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:relative}
+  .glass::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.06),transparent 40%);pointer-events:none}
+  .header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:28px}
+  .eyebrow{font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--cyan);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pulse 2s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+  .title{font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,5vw,42px);font-weight:700;letter-spacing:-.02em;background:linear-gradient(135deg,#fff,#b8c2d4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .subtitle{color:var(--text-mid);font-size:14px;margin-top:8px;font-weight:300}
+  .price-pill{padding:10px 18px;border-radius:14px}
+  .price-pill .label{font-size:11px;color:var(--text-low);text-transform:uppercase;letter-spacing:.08em}
+  .price-pill .value{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600}
+  .loading-state{text-align:center;padding:60px 20px;font-size:15px;color:var(--text-mid)}
+  .spinner{width:36px;height:36px;border:3px solid var(--glass-border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .hero-row{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
+  @media(max-width:760px){.hero-row{grid-template-columns:1fr}}
+  .hero-progress{padding:28px;display:flex;flex-direction:column;justify-content:center}
+  .progress-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
+  .progress-top .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
+  .progress-top .pct{font-family:'Space Grotesk',sans-serif;font-size:44px;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+  .ring-track{position:relative;width:100%;height:14px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
+  .ring-fill{position:absolute;top:0;left:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:10px;box-shadow:0 0 20px rgba(77,232,255,.5);transition:width 1.6s cubic-bezier(.16,1,.3,1)}
+  .ring-marks{display:flex;justify-content:space-between;margin-top:8px}
+  .ring-marks span{font-size:10.5px;color:var(--text-low);font-family:'Space Grotesk',sans-serif}
+  .hero-stats{display:flex;flex-direction:column;gap:12px}
+  .stat-glass{padding:16px 18px;display:flex;align-items:center;flex:1}
+  .stat-glass .left{display:flex;align-items:center;gap:12px}
+  .stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .stat-icon svg{width:18px;height:18px}
+  .stat-text .lbl{font-size:11.5px;color:var(--text-mid)}
+  .stat-text .num{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;margin-top:2px}
+  .chart-glass{padding:26px 24px 18px;margin-bottom:16px}
+  .chart-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+  .chart-head .h{font-family:'Space Grotesk',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
+  .chart-now{text-align:right}
+  .chart-now .v{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;color:var(--orange);line-height:1}
+  .chart-now .l{font-size:11px;color:var(--text-low);text-transform:uppercase}
+  .chart-svg-wrap{width:100%;overflow:visible;margin-top:10px;position:relative}
+  #hoverTooltip{position:absolute;pointer-events:none;background:rgba(15,18,26,.95);border:1px solid var(--glass-border);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--text-hi);transform:translate(-50%,-120%);opacity:0;transition:opacity .15s;white-space:nowrap;font-family:'Space Grotesk',sans-serif;z-index:5}
+  #hoverTooltip .tt-period{color:var(--text-mid);font-size:10.5px}
+  #hoverTooltip .tt-val{font-weight:600}
+  .legend-row{display:flex;gap:22px;flex-wrap:wrap;margin-top:6px;padding-top:16px;border-top:1px solid var(--glass-border)}
+  .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-mid)}
+  .legend-line{width:18px;height:3px;border-radius:2px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr 1fr}}
+  .card{padding:18px 16px;transition:transform .25s,border-color .25s}
+  .card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.18)}
+  .card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-low);margin-bottom:8px}
+  .card .v{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:600;line-height:1.1}
+  .card .sub{font-size:11.5px;color:var(--text-mid);margin-top:4px}
+  .timeline-glass{padding:22px 26px 30px;margin-bottom:16px}
+  .timeline-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+  .timeline-head .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
+  .timeline-head .v{font-size:12px;color:var(--text-low)}
+  .milestone-track{position:relative;height:4px;background:rgba(255,255,255,.07);border-radius:4px;margin:50px 6px 36px}
+  .milestone-fill{position:absolute;top:0;left:0;bottom:0;border-radius:4px;background:linear-gradient(90deg,var(--violet),var(--cyan));width:0%;transition:width 1.8s cubic-bezier(.16,1,.3,1);box-shadow:0 0 16px rgba(77,232,255,.45)}
+  .milestone-pt{position:absolute;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#1c2230;border:2px solid var(--text-low)}
+  .milestone-pt.done{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 10px rgba(77,232,255,.6)}
+  .milestone-pt.now{width:18px;height:18px;background:var(--orange);border-color:var(--orange);animation:nowPulse 2s ease-in-out infinite}
+  @keyframes nowPulse{0%,100%{box-shadow:0 0 0 6px rgba(255,138,77,.18),0 0 14px rgba(255,138,77,.6)}50%{box-shadow:0 0 0 10px rgba(255,138,77,.08),0 0 20px rgba(255,138,77,.8)}}
+  .milestone-label{position:absolute;top:-34px;transform:translateX(-50%);font-size:10px;color:var(--text-low);white-space:nowrap;text-align:center;font-family:'Space Grotesk',sans-serif}
+  .milestone-label .pct{color:var(--text-mid);font-weight:600;display:block;font-size:12px;margin-bottom:1px}
+  .milestone-label.below{top:22px}
+  .table-glass{padding:22px 20px}
+  .table-head{margin-bottom:14px}
+  .table-head .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{font-family:'Space Grotesk',sans-serif;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-low);padding:8px 10px;border-bottom:1px solid var(--glass-border);text-align:right}
+  thead th:first-child{text-align:left}
+  tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
+  tbody tr:hover{background:rgba(255,255,255,.03)}
+  tbody td{padding:7px 10px;text-align:right;font-family:'Space Grotesk',sans-serif;color:var(--text-mid)}
+  tbody td:first-child{text-align:left}
+  tbody tr.current-row td{color:var(--text-hi)}
+  .badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:600}
+  .badge.paid{background:rgba(77,255,176,.12);color:var(--green)}
+  .badge.current{background:rgba(255,138,77,.14);color:var(--orange)}
+  .badge.upcoming{background:rgba(255,255,255,.06);color:var(--text-low)}
+  .update-info{text-align:center;font-size:11.5px;color:var(--text-low);margin-top:22px}
+  .update-info span{color:var(--cyan)}
 </style>
 </head>
 <body>
-
 <div class="mesh-bg">
   <div class="blob blob-1"></div>
   <div class="blob blob-2"></div>
   <div class="blob blob-3"></div>
 </div>
-
 <div class="wrap">
   <div class="header fade-in">
     <div>
@@ -183,10 +121,8 @@
       <div class="subtitle">อัปเดตข้อมูลตรงจาก Google Sheets แบบ Real-time</div>
     </div>
     <div class="price-pill glass">
-      <div>
-        <div class="label">ราคารถ</div>
-        <div class="value" id="priceVal">กำลังโหลด...</div>
-      </div>
+      <div class="label">ราคารถ</div>
+      <div class="value" id="priceVal">กำลังโหลด...</div>
     </div>
   </div>
 
@@ -195,8 +131,7 @@
     กำลังดึงข้อมูลจาก Google Sheets...
   </div>
 
-  <div id="mainContent" style="display:none;">
-
+  <div id="mainContent" style="display:none">
     <div class="hero-row">
       <div class="hero-progress glass fade-in" style="animation-delay:.05s">
         <div class="progress-top">
@@ -209,7 +144,7 @@
       <div class="hero-stats">
         <div class="stat-glass glass fade-in" style="animation-delay:.1s">
           <div class="left">
-            <div class="stat-icon" style="background:rgba(77,255,176,.12);">
+            <div class="stat-icon" style="background:rgba(77,255,176,.12)">
               <svg viewBox="0 0 24 24" fill="none" stroke="#4DFFB0" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="stat-text">
@@ -220,7 +155,7 @@
         </div>
         <div class="stat-glass glass fade-in" style="animation-delay:.15s">
           <div class="left">
-            <div class="stat-icon" style="background:rgba(255,138,77,.12);">
+            <div class="stat-icon" style="background:rgba(255,138,77,.12)">
               <svg viewBox="0 0 24 24" fill="none" stroke="#FF8A4D" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
             </div>
             <div class="stat-text">
@@ -241,7 +176,7 @@
         </div>
       </div>
       <div class="chart-svg-wrap">
-        <svg id="trendChart" viewBox="0 0 900 320" width="100%" style="display:block;"></svg>
+        <svg id="trendChart" viewBox="0 0 900 320" width="100%" style="display:block"></svg>
         <div id="hoverTooltip"></div>
       </div>
       <div class="legend-row">
@@ -285,304 +220,194 @@
     </div>
 
     <div class="table-glass glass fade-in" style="animation-delay:.5s">
-      <div class="table-head">
-        <div class="h">ประวัติการจ่ายรายงวด</div>
-      </div>
+      <div class="table-head"><div class="h">ประวัติการจ่ายรายงวด</div></div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>งวดที่</th>
-              <th>วันที่</th>
-              <th>ยอดชำระ</th>
-              <th>ยอดคงเหลือ</th>
-              <th>สถานะ</th>
-            </tr>
-          </thead>
+          <thead><tr><th>งวดที่</th><th>วันที่</th><th>ยอดชำระ</th><th>ยอดคงเหลือ</th><th>สถานะ</th></tr></thead>
           <tbody id="paymentTable"></tbody>
         </table>
       </div>
     </div>
-
-  </div><!-- end mainContent -->
+  </div>
 
   <div class="update-info">อัปเดตจาก Google Sheets · <span id="lastUpdate">—</span></div>
 </div>
 
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbzGRE7SmAQ_TFz-IPpWNnj6At8swAu6BA91Vs8tA-sxTzZIh-5p2s2o0xvlYqg-efVk/exec';
+const API = 'https://script.google.com/macros/s/AKfycbzGRE7SmAQ_TFz-IPpWNnj6At8swAu6BA91Vs8tA-sxTzZIh-5p2s2o0xvlYqg-efVk/exec';
+const TOTAL = 60;
 
-function fmt(n) {
-  return '฿' + Math.round(n).toLocaleString('en-US');
-}
+const fmt = n => '฿' + Math.round(n).toLocaleString('en-US');
 
-function animateNumber(el, target, duration, prefix = '฿') {
-  const start = performance.now();
-  function tick(now) {
-    const t = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - t, 3);
-    const val = Math.round(target * eased);
-    el.textContent = prefix + val.toLocaleString('en-US');
-    if (t < 1) requestAnimationFrame(tick);
-  }
+function animCount(el, target, ms, pre='฿') {
+  const t0 = performance.now();
+  const tick = now => {
+    const t = Math.min((now-t0)/ms, 1), e = 1-Math.pow(1-t,3);
+    el.textContent = pre + Math.round(target*e).toLocaleString('en-US');
+    if(t<1) requestAnimationFrame(tick);
+  };
   requestAnimationFrame(tick);
 }
 
-async function loadData() {
+async function load() {
   try {
-    const res = await fetch(API_URL);
+    const res = await fetch(API);
     const rows = await res.json();
+    // rows is array of arrays (row x col), data is HORIZONTAL
+    // Row index (0-based): 0=title, 1=Price, 2=Payment, 3=Period, 4=Paid, 5=RemPeriod, 6=AmtPaid, 7=AmtDue, 8=Dates
+    const r = rows; // alias
 
-    // parse sheet — find header row then data rows
-    // Expected columns: งวดที่, วันที่, ยอดชำระ, ยอดคงเหลือ, สถานะ (✅ or blank)
-    // Find rows with numeric first column (งวดที่)
-    const dataRows = rows.filter(r => !isNaN(parseFloat(r[0])) && r[0] !== '');
+    // Extract key values from known rows
+    const price      = parseFloat(r[1]?.[1]) || 849780;       // B2
+    const stdPayment = parseFloat(r[2]?.[1]) || 14163;        // B3 (first payment)
+    const lastPay    = parseFloat(r[2]?.[59]) || 14123;       // BH3 (60th payment)
+    const amtPaid    = parseFloat(r[6]?.[1]) || 283260;       // B7
+    const amtDue     = parseFloat(r[7]?.[1]) || 566520;       // B8
+    const remPeriods = parseInt(r[5]?.[1])   || 40;           // B6
 
-    if (dataRows.length === 0) throw new Error('ไม่พบข้อมูล');
-
-    // Find price from header area (row with ราคา or first numeric in col with big value)
-    let price = 849780; // fallback
-    for (const r of rows) {
-      for (const cell of r) {
-        if (typeof cell === 'number' && cell > 500000 && cell < 5000000) {
-          price = cell; break;
-        }
-      }
+    // Count paid periods: Row 5 (index 4), cols 1..60
+    let paid = 0;
+    const paidStatus = [];
+    for(let i=1; i<=TOTAL; i++) {
+      const cell = r[4]?.[i] || '';
+      const isPaid = cell.toString().includes('✅') || cell.toString().toLowerCase().includes('paid');
+      paidStatus.push(isPaid);
+      if(isPaid) paid++;
     }
 
-    // Identify paid rows (col index 4 or last col contains ✅ or "paid")
-    const total = 60;
-    let paidRows = [];
-    let unpaidRows = [];
+    // Payment amounts: row 3 (index 2), cols 1..60
+    const payments = [];
+    for(let i=1; i<=TOTAL; i++) payments.push(parseFloat(r[2]?.[i]) || stdPayment);
 
-    dataRows.forEach(r => {
-      const period = parseFloat(r[0]);
-      const date = r[1] || '';
-      const payment = parseFloat(r[2]) || 0;
-      const balance = parseFloat(r[3]) || 0;
-      // check status col — any of cols 4,5 for checkmark
-      const status = (r[4] || '') + (r[5] || '');
-      const isPaid = status.includes('✅') || status.toString().toLowerCase().includes('paid') || status.includes('จ่าย');
-      const obj = { period, date, payment, balance, isPaid };
-      if (isPaid) paidRows.push(obj);
-      else unpaidRows.push(obj);
-    });
+    // Dates: row 9 (index 8), cols 1..60
+    const dates = [];
+    for(let i=1; i<=TOTAL; i++) dates.push(r[8]?.[i] || '');
 
-    const paid = paidRows.length;
-    const lastPaid = paidRows[paidRows.length - 1];
-    const stdPayment = paidRows[0]?.payment || 14163;
-    const lastPayment = lastPaid?.payment || stdPayment;
-    const currentBalance = lastPaid?.balance || (price - paid * stdPayment);
-    const paidAmount = price - currentBalance;
-    const progressPct = (paid / total) * 100;
+    // Balance at each period
+    const balances = [price];
+    for(let i=1; i<=TOTAL; i++) balances.push(Math.max(price - payments.slice(0,i).reduce((a,b)=>a+b,0), 0));
 
-    // fill all 60 balances for chart
-    const balances = [];
-    for (let i = 0; i <= total; i++) {
-      if (i === 0) { balances.push(price); continue; }
-      const found = dataRows.find(r => parseFloat(r[0]) === i);
-      if (found && parseFloat(found[3])) {
-        balances.push(parseFloat(found[3]));
-      } else {
-        // project
-        balances.push(Math.max(price - i * stdPayment, 0));
-      }
-    }
+    const pct = (paid/TOTAL)*100;
+    const lastDate = dates[paid-1] || '';
+    const firstDate = dates[0] || '';
 
-    // ---- render ----
+    // Show UI
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
 
     document.getElementById('priceVal').textContent = fmt(price);
-    document.getElementById('remainNow').textContent = fmt(currentBalance);
+    document.getElementById('remainNow').textContent = fmt(amtDue);
     document.getElementById('remainNowLabel').textContent = `คงเหลือ ณ งวดที่ ${paid}`;
     document.getElementById('lastUpdate').textContent = new Date().toLocaleString('th-TH');
+    document.getElementById('cardPeriod').textContent = `${paid} / ${TOTAL}`;
+    document.getElementById('cardDate').textContent = lastDate;
+    document.getElementById('cardPayment').textContent = fmt(stdPayment);
+    document.getElementById('cardPaymentSub').textContent = `งวดสุดท้าย ${fmt(lastPay)}`;
+    document.getElementById('cardPct').textContent = pct.toFixed(1) + '%';
+    document.getElementById('cardRemain').textContent = `${remPeriods} งวด`;
+    document.getElementById('cardDue').textContent = `ครบกำหนดประมาณ ~${remPeriods} เดือน`;
+    if(firstDate) document.getElementById('timelineStart').textContent = `เริ่ม ${firstDate}`;
 
     // animated counters
-    animateNumber(document.getElementById('paidNum'), paidAmount, 1400);
-    animateNumber(document.getElementById('remainNum'), currentBalance, 1400);
-
-    // progress bar + pct
-    const heroPct = document.getElementById('heroPct');
-    setTimeout(() => { document.getElementById('ringFill').style.width = progressPct + '%'; }, 150);
-    const pctStart = performance.now();
-    function pctTick(now) {
-      const t = Math.min((now - pctStart) / 1400, 1);
-      heroPct.textContent = (progressPct * (1 - Math.pow(1 - t, 3))).toFixed(1) + '%';
-      if (t < 1) requestAnimationFrame(pctTick);
-    }
+    animCount(document.getElementById('paidNum'), amtPaid, 1400);
+    animCount(document.getElementById('remainNum'), amtDue, 1400);
+    setTimeout(()=>{ document.getElementById('ringFill').style.width = pct+'%'; }, 150);
+    const t0 = performance.now();
+    const pctEl = document.getElementById('heroPct');
+    const pctTick = now => {
+      const t = Math.min((now-t0)/1400,1), e = 1-Math.pow(1-t,3);
+      pctEl.textContent = (pct*e).toFixed(1)+'%';
+      if(t<1) requestAnimationFrame(pctTick);
+    };
     requestAnimationFrame(pctTick);
 
-    // cards
-    document.getElementById('cardPeriod').textContent = `${paid} / ${total}`;
-    document.getElementById('cardDate').textContent = lastPaid?.date || '—';
-    document.getElementById('cardPayment').textContent = fmt(stdPayment);
-    document.getElementById('cardPaymentSub').textContent = `งวดสุดท้าย ${fmt(lastPayment)}`;
-    document.getElementById('cardPct').textContent = progressPct.toFixed(1) + '%';
-    document.getElementById('cardRemain').textContent = `${total - paid} งวด`;
-
-    // estimate end date
-    const lastDate = lastPaid?.date;
-    if (lastDate) {
-      document.getElementById('cardDue').textContent = `ครบกำหนดประมาณ ~${total - paid} เดือนข้างหน้า`;
-    }
-
-    // timeline start
-    if (paidRows[0]?.date) document.getElementById('timelineStart').textContent = `เริ่ม ${paidRows[0].date}`;
-
-    // milestone track
-    setTimeout(() => { document.getElementById('milestoneFill').style.width = progressPct + '%'; }, 200);
+    // milestone
+    setTimeout(()=>{ document.getElementById('milestoneFill').style.width = pct+'%'; }, 200);
     const track = document.getElementById('milestoneTrack');
-    const milestones = [
-      { pct:0, label:'เริ่มต้น', sub:'งวด 1', below:true },
-      { pct:25, label:'25%', sub:`งวด ${Math.round(total*.25)}`, below:false },
-      { pct:50, label:'50%', sub:`งวด ${Math.round(total*.5)}`, below:true },
-      { pct:75, label:'75%', sub:`งวด ${Math.round(total*.75)}`, below:false },
-      { pct:100, label:'ปลดหนี้', sub:`งวด ${total}`, below:true },
-    ];
-    milestones.forEach(m => {
-      const pt = document.createElement('div');
-      pt.className = 'milestone-pt' + (m.pct <= progressPct ? ' done' : '');
-      pt.style.left = m.pct + '%';
-      track.appendChild(pt);
-      const lbl = document.createElement('div');
-      lbl.className = 'milestone-label' + (m.below ? ' below' : '');
-      lbl.style.left = m.pct + '%';
-      lbl.innerHTML = `<span class="pct">${m.label}</span>${m.sub}`;
-      track.appendChild(lbl);
+    [{pct:0,label:'เริ่มต้น',sub:`งวด 1`,below:true},{pct:25,label:'25%',sub:`งวด ${Math.round(TOTAL*.25)}`,below:false},{pct:50,label:'50%',sub:`งวด ${Math.round(TOTAL*.5)}`,below:true},{pct:75,label:'75%',sub:`งวด ${Math.round(TOTAL*.75)}`,below:false},{pct:100,label:'ปลดหนี้',sub:`งวด ${TOTAL}`,below:true}].forEach(m=>{
+      const pt=document.createElement('div'); pt.className='milestone-pt'+(m.pct<=pct?' done':''); pt.style.left=m.pct+'%'; track.appendChild(pt);
+      const lb=document.createElement('div'); lb.className='milestone-label'+(m.below?' below':''); lb.style.left=m.pct+'%'; lb.innerHTML=`<span class="pct">${m.label}</span>${m.sub}`; track.appendChild(lb);
     });
-    const nowPt = document.createElement('div');
-    nowPt.className = 'milestone-pt now';
-    nowPt.style.left = progressPct + '%';
-    track.appendChild(nowPt);
-    const nowLbl = document.createElement('div');
-    nowLbl.className = 'milestone-label';
-    nowLbl.style.left = progressPct + '%';
-    nowLbl.style.top = '-50px';
-    nowLbl.innerHTML = `<span class="pct" style="color:var(--orange)">ปัจจุบัน</span>งวด ${paid}`;
-    track.appendChild(nowLbl);
+    const np=document.createElement('div'); np.className='milestone-pt now'; np.style.left=pct+'%'; track.appendChild(np);
+    const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-50px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">ปัจจุบัน</span>งวด ${paid}`; track.appendChild(nl);
 
     // chart
-    buildChart(balances, paid, total, price, dataRows);
+    buildChart(balances, paid, TOTAL, price, dates, paidStatus, payments);
 
-    // payment table (show last 5 paid + next 5)
+    // table: last 5 paid + next 5
     const tbody = document.getElementById('paymentTable');
-    const showRows = [...dataRows.slice(Math.max(0, paid - 5), paid), ...dataRows.slice(paid, paid + 5)];
-    showRows.forEach(r => {
-      const period = parseFloat(r[0]);
-      const isPaid = paidRows.find(p => p.period === period);
-      const isCurrent = period === paid;
-      const tr = document.createElement('tr');
-      tr.className = isPaid ? 'paid-row' : '';
-      if (isCurrent) tr.className = 'current-row';
-      const badge = isCurrent
-        ? `<span class="badge current">งวดล่าสุด</span>`
-        : isPaid
-          ? `<span class="badge paid">✅ จ่ายแล้ว</span>`
-          : `<span class="badge upcoming">รออยู่</span>`;
-      tr.innerHTML = `
-        <td>${period}</td>
-        <td>${r[1] || '—'}</td>
-        <td>${r[2] ? fmt(r[2]) : '—'}</td>
-        <td>${r[3] ? fmt(r[3]) : '—'}</td>
-        <td>${badge}</td>`;
+    const show = [];
+    for(let i=Math.max(0,paid-5); i<paid; i++) show.push(i);
+    for(let i=paid; i<Math.min(TOTAL,paid+5); i++) show.push(i);
+    show.forEach(idx=>{
+      const period=idx+1, isPaid=paidStatus[idx], isCurr=(period===paid);
+      const bal = balances[period];
+      const tr=document.createElement('tr');
+      if(isCurr) tr.className='current-row';
+      const badge = isCurr ? `<span class="badge current">งวดล่าสุด</span>` : isPaid ? `<span class="badge paid">✅ จ่ายแล้ว</span>` : `<span class="badge upcoming">รออยู่</span>`;
+      tr.innerHTML=`<td>${period}</td><td>${dates[idx]||'—'}</td><td>${fmt(payments[idx])}</td><td>${fmt(bal)}</td><td>${badge}</td>`;
       tbody.appendChild(tr);
     });
 
   } catch(e) {
-    document.getElementById('loadingState').innerHTML = `
-      <div style="color:#FF8A4D; font-size:14px;">⚠️ ดึงข้อมูลไม่ได้</div>
-      <div style="margin-top:8px; font-size:12px; color:var(--text-low)">${e.message}</div>`;
+    document.getElementById('loadingState').innerHTML = `<div style="color:#FF8A4D;font-size:14px">⚠️ ดึงข้อมูลไม่ได้</div><div style="margin-top:8px;font-size:12px;color:var(--text-low)">${e.message}</div>`;
   }
 }
 
-function buildChart(balances, paid, total, price, dataRows) {
-  const svg = document.getElementById('trendChart');
-  const W=900, H=320, padL=64, padR=16, padT=20, padB=34;
-  const plotW=W-padL-padR, plotH=H-padT-padB;
-  const xFor = i => padL + (i/total)*plotW;
-  const yFor = bal => padT + (1 - bal/price)*plotH;
-
-  let s = `<defs>
-    <linearGradient id="areaG" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#4DE8FF" stop-opacity=".18"/>
-      <stop offset="100%" stop-color="#4DE8FF" stop-opacity="0"/>
-    </linearGradient>
-    <linearGradient id="lineG" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#4DFFB0"/><stop offset="100%" stop-color="#4DE8FF"/>
-    </linearGradient>
+function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
+  const svg=document.getElementById('trendChart');
+  const W=900,H=320,pL=64,pR=16,pT=20,pB=34,plotW=W-pL-pR,plotH=H-pT-pB;
+  const xF=i=>pL+(i/total)*plotW, yF=b=>pT+(1-b/price)*plotH;
+  let s=`<defs>
+    <linearGradient id="aG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4DE8FF" stop-opacity=".18"/><stop offset="100%" stop-color="#4DE8FF" stop-opacity="0"/></linearGradient>
+    <linearGradient id="lG" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4DFFB0"/><stop offset="100%" stop-color="#4DE8FF"/></linearGradient>
   </defs>`;
-
-  // grid
-  [0,200000,400000,600000,800000].forEach(v => {
-    const y = yFor(v);
-    s += `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
-    s += `<text x="${padL-10}" y="${y+4}" text-anchor="end" font-family="Space Grotesk" font-size="11" fill="#4B5263">${v/1000}k</text>`;
+  [0,200000,400000,600000,800000].forEach(v=>{
+    const y=yF(v);
+    s+=`<line x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
+    s+=`<text x="${pL-10}" y="${y+4}" text-anchor="end" font-family="Space Grotesk" font-size="11" fill="#4B5263">${v/1000}k</text>`;
   });
-  for (let i=0; i<=total; i+=10) {
-    const x = xFor(i);
-    s += `<line x1="${x}" y1="${padT}" x2="${x}" y2="${H-padB}" stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;
-    s += `<text x="${x}" y="${H-padB+18}" text-anchor="middle" font-family="Space Grotesk" font-size="11" fill="#4B5263">${i===0?'เริ่ม':i}</text>`;
+  for(let i=0;i<=total;i+=10){
+    const x=xF(i);
+    s+=`<line x1="${x}" y1="${pT}" x2="${x}" y2="${H-pB}" stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;
+    s+=`<text x="${x}" y="${H-pB+18}" text-anchor="middle" font-family="Space Grotesk" font-size="11" fill="#4B5263">${i===0?'เริ่ม':i}</text>`;
   }
-
-  let fullPath = `M ${xFor(0)} ${yFor(balances[0])}`;
-  for (let i=1; i<=total; i++) fullPath += ` L ${xFor(i)} ${yFor(balances[i])}`;
-  s += `<path d="${fullPath} L ${xFor(total)} ${H-padB} L ${xFor(0)} ${H-padB} Z" fill="url(#areaG)"/>`;
-
-  let paidPath = `M ${xFor(0)} ${yFor(balances[0])}`;
-  for (let i=1; i<=paid; i++) paidPath += ` L ${xFor(i)} ${yFor(balances[i])}`;
-  let projPath = `M ${xFor(paid)} ${yFor(balances[paid])}`;
-  for (let i=paid+1; i<=total; i++) projPath += ` L ${xFor(i)} ${yFor(balances[i])}`;
-
-  s += `<path d="${projPath}" fill="none" stroke="#FF8A4D" stroke-width="3" stroke-dasharray="6 5" opacity=".6"/>`;
-  s += `<path d="${paidPath}" fill="none" stroke="#4DE8FF" stroke-width="9" opacity=".2"/>`;
-  s += `<path d="${paidPath}" fill="none" stroke="url(#lineG)" stroke-width="3.5"/>`;
-
-  // dots + hover targets
-  for (let i=0; i<=total; i++) {
-    const x=xFor(i), y=yFor(balances[i]);
-    const isCurr = i===paid;
-    const isPaidPt = i<=paid;
-    if (i%5===0 || isCurr || i===total) {
-      const col = isCurr ? '#FF8A4D' : (isPaidPt ? '#4DFFB0' : '#5A6678');
-      s += `<circle cx="${x}" cy="${y}" r="${isCurr?6:4}" fill="${col}" stroke="#0A0E16" stroke-width="2"/>`;
-      if (isCurr) {
-        s += `<circle cx="${x}" cy="${y}" r="11" fill="none" stroke="#FF8A4D" stroke-width="1.5" opacity=".5"/>`;
-        s += `<text x="${x}" y="${y-18}" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="12" fill="#F2F4F8">วันนี้</text>`;
-      }
+  let full=`M ${xF(0)} ${yF(balances[0])}`;
+  for(let i=1;i<=total;i++) full+=` L ${xF(i)} ${yF(balances[i])}`;
+  s+=`<path d="${full} L ${xF(total)} ${H-pB} L ${xF(0)} ${H-pB} Z" fill="url(#aG)"/>`;
+  let paidP=`M ${xF(0)} ${yF(balances[0])}`;
+  for(let i=1;i<=paid;i++) paidP+=` L ${xF(i)} ${yF(balances[i])}`;
+  let projP=`M ${xF(paid)} ${yF(balances[paid])}`;
+  for(let i=paid+1;i<=total;i++) projP+=` L ${xF(i)} ${yF(balances[i])}`;
+  s+=`<path d="${projP}" fill="none" stroke="#FF8A4D" stroke-width="3" stroke-dasharray="6 5" opacity=".6"/>`;
+  s+=`<path d="${paidP}" fill="none" stroke="#4DE8FF" stroke-width="9" opacity=".18"/>`;
+  s+=`<path d="${paidP}" fill="none" stroke="url(#lG)" stroke-width="3.5"/>`;
+  for(let i=0;i<=total;i++){
+    const x=xF(i),y=yF(balances[i]),isCurr=(i===paid),isPaid=(i<=paid);
+    if(i%5===0||isCurr||i===total){
+      const col=isCurr?'#FF8A4D':(isPaid?'#4DFFB0':'#5A6678');
+      s+=`<circle cx="${x}" cy="${y}" r="${isCurr?6:4}" fill="${col}" stroke="#0A0E16" stroke-width="2"/>`;
+      if(isCurr){ s+=`<circle cx="${x}" cy="${y}" r="11" fill="none" stroke="#FF8A4D" stroke-width="1.5" opacity=".5"/>`; s+=`<text x="${x}" y="${y-18}" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="12" fill="#F2F4F8">วันนี้</text>`; }
     }
-    const row = dataRows.find(r => parseFloat(r[0])===i);
-    const dateLabel = row ? row[1] : (i===0 ? 'เริ่มต้น' : 'คาดการณ์');
-    s += `<circle class="ht" data-i="${i}" data-bal="${balances[i]}" data-date="${dateLabel}" data-paid="${i<=paid}" cx="${x}" cy="${y}" r="10" fill="transparent" style="cursor:pointer"/>`;
+    const dl=dates[i-1]||(i===0?'เริ่มต้น':'คาดการณ์');
+    s+=`<circle class="ht" data-i="${i}" data-bal="${balances[i]}" data-date="${dl}" data-paid="${isPaid}" cx="${x}" cy="${y}" r="10" fill="transparent" style="cursor:pointer"/>`;
   }
-
-  svg.innerHTML = s;
-
-  // tooltip interaction
-  const tooltip = document.getElementById('hoverTooltip');
-  const wrap = document.querySelector('.chart-svg-wrap');
-  svg.querySelectorAll('.ht').forEach(t => {
-    t.addEventListener('mouseenter', () => {
-      const i = t.getAttribute('data-i');
-      const bal = parseFloat(t.getAttribute('data-bal'));
-      const date = t.getAttribute('data-date');
-      const isPaid = t.getAttribute('data-paid') === 'true';
-      const rect = svg.getBoundingClientRect();
-      const wRect = wrap.getBoundingClientRect();
-      const scX = rect.width/W, scY = rect.height/H;
-      const cx = parseFloat(t.getAttribute('cx')), cy = parseFloat(t.getAttribute('cy'));
-      tooltip.innerHTML = `<div class="tt-period">งวด ${i} · ${date}</div><div class="tt-val">${fmt(bal)}</div><div class="tt-period">${isPaid?'จ่ายแล้ว':'คาดการณ์'}</div>`;
-      tooltip.style.left = (rect.left - wRect.left + cx*scX) + 'px';
-      tooltip.style.top = (rect.top - wRect.top + cy*scY) + 'px';
-      tooltip.style.opacity = '1';
+  svg.innerHTML=s;
+  const tip=document.getElementById('hoverTooltip'), wrap=document.querySelector('.chart-svg-wrap');
+  svg.querySelectorAll('.ht').forEach(t=>{
+    t.addEventListener('mouseenter',()=>{
+      const i=t.getAttribute('data-i'), bal=parseFloat(t.getAttribute('data-bal')), date=t.getAttribute('data-date'), isPaid=t.getAttribute('data-paid')==='true';
+      const sr=svg.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
+      const sx=sr.width/W, sy=sr.height/H, cx=parseFloat(t.getAttribute('cx')), cy=parseFloat(t.getAttribute('cy'));
+      tip.innerHTML=`<div class="tt-period">งวด ${i} · ${date}</div><div class="tt-val">${fmt(bal)}</div><div class="tt-period">${isPaid?'จ่ายแล้ว':'คาดการณ์'}</div>`;
+      tip.style.left=(sr.left-wr.left+cx*sx)+'px'; tip.style.top=(sr.top-wr.top+cy*sy)+'px'; tip.style.opacity='1';
     });
-    t.addEventListener('mouseleave', () => { tooltip.style.opacity = '0'; });
+    t.addEventListener('mouseleave',()=>{ tip.style.opacity='0'; });
   });
 }
 
-// load on start + auto-refresh every 5 minutes
-loadData();
-setInterval(loadData, 5 * 60 * 1000);
+load();
+setInterval(load, 5*60*1000);
 </script>
 </body>
 </html>
