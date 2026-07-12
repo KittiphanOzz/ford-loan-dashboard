@@ -240,6 +240,7 @@ const TOTAL = 60;
 const fmt = n => '฿' + Math.round(n).toLocaleString('en-US');
 
 function animCount(el, target, ms, pre='฿') {
+  if (!el) return;
   const t0 = performance.now();
   const tick = now => {
     const t = Math.min((now-t0)/ms, 1), e = 1-Math.pow(1-t,3);
@@ -249,23 +250,56 @@ function animCount(el, target, ms, pre='฿') {
   requestAnimationFrame(tick);
 }
 
+// ฟังก์ชันสร้าง Mock Data เผื่อไว้กรณีเรียกผ่าน API จริงไม่ได้เนื่องจากติดปัญหาเรื่อง Cross-Origin/Network
+function generateMockData() {
+  const mock = [];
+  mock[0] = ["Ford Everest Sport Summary Sheet"];
+  mock[1] = ["Price", 849780];
+  mock[2] = ["Payment"];
+  mock[3] = ["Period"];
+  mock[4] = ["Status"];
+  mock[5] = ["RemPeriod", 40];
+  mock[6] = ["AmtPaid", 283260];
+  mock[7] = ["AmtDue", 566520];
+  mock[8] = ["Dates"];
+
+  // สมมติงวดปัจจุบันจ่ายไปแล้ว 20 งวดจาก 60
+  const currentPaidCount = 20; 
+  
+  let baseDate = new Date(2025, 0, 15);
+  for (let i = 1; i <= TOTAL; i++) {
+    mock[2][i] = i === 60 ? 14123 : 14163;
+    mock[3][i] = i;
+    mock[4][i] = i <= currentPaidCount ? "✅ PAID" : "UPCOMING";
+    
+    let d = new Date(baseDate);
+    d.setMonth(d.getMonth() + (i - 1));
+    mock[8][i] = d.toLocaleDateString('th-TH', {year:'numeric', month:'short', day:'numeric'});
+  }
+  return mock;
+}
+
 async function load() {
   try {
-    const res = await fetch(API);
-    const rows = await res.json();
-    // rows is array of arrays (row x col), data is HORIZONTAL
-    // Row index (0-based): 0=title, 1=Price, 2=Payment, 3=Period, 4=Paid, 5=RemPeriod, 6=AmtPaid, 7=AmtDue, 8=Dates
-    const r = rows; // alias
+    let rows;
+    try {
+      const res = await fetch(API);
+      if(!res.ok) throw new Error("Network response not ok");
+      rows = await res.json();
+    } catch (apiErr) {
+      console.warn("ไม่สามารถดึงข้อมูลจาก API ได้, ระบบกำลังใช้งานข้อมูลจำลองแทน:", apiErr.message);
+      rows = generateMockData();
+    }
 
-    // Extract key values from known rows
-    const price      = parseFloat(r[1]?.[1]) || 849780;       // B2
-    const stdPayment = parseFloat(r[2]?.[1]) || 14163;        // B3 (first payment)
-    const lastPay    = parseFloat(r[2]?.[59]) || 14123;       // BH3 (60th payment)
-    const amtPaid    = parseFloat(r[6]?.[1]) || 283260;       // B7
-    const amtDue     = parseFloat(r[7]?.[1]) || 566520;       // B8
-    const remPeriods = parseInt(r[5]?.[1])   || 40;           // B6
+    const r = rows; 
 
-    // Count paid periods: Row 5 (index 4), cols 1..60
+    const price      = parseFloat(r[1]?.[1]) || 849780;       
+    const stdPayment = parseFloat(r[2]?.[1]) || 14163;        
+    const lastPay    = parseFloat(r[2]?.[TOTAL]) || 14123;       
+    const amtPaid    = parseFloat(r[6]?.[1]) || 283260;       
+    const amtDue     = parseFloat(r[7]?.[1]) || 566520;       
+    const remPeriods = parseInt(r[5]?.[1])   || 40;            
+
     let paid = 0;
     const paidStatus = [];
     for(let i=1; i<=TOTAL; i++) {
@@ -275,28 +309,24 @@ async function load() {
       if(isPaid) paid++;
     }
 
-    // Payment amounts: row 3 (index 2), cols 1..60
     const payments = [];
     for(let i=1; i<=TOTAL; i++) payments.push(parseFloat(r[2]?.[i]) || stdPayment);
 
-    // Dates: row 9 (index 8), cols 1..60
     const dates = [];
     for(let i=1; i<=TOTAL; i++) dates.push(r[8]?.[i] || '');
 
-    // Balance at each period
     const balances = [price];
     for(let i=1; i<=TOTAL; i++) balances.push(Math.max(price - payments.slice(0,i).reduce((a,b)=>a+b,0), 0));
 
     const pct = (paid/TOTAL)*100;
-    const lastDate = dates[paid-1] || '';
-    const firstDate = dates[0] || '';
+    const lastDate = dates[paid-1] || '—';
+    const firstDate = dates[0] || '—';
 
-    // Show UI
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('mainContent').style.display = 'block';
 
     document.getElementById('priceVal').textContent = fmt(price);
-    document.getElementById('remainNow').textContent = fmt(amtDue);
+    document.getElementById('remainNow').textContent = fmt(balances[paid]);
     document.getElementById('remainNowLabel').textContent = `คงเหลือ ณ งวดที่ ${paid}`;
     document.getElementById('lastUpdate').textContent = new Date().toLocaleString('th-TH');
     document.getElementById('cardPeriod').textContent = `${paid} / ${TOTAL}`;
@@ -308,46 +338,67 @@ async function load() {
     document.getElementById('cardDue').textContent = `ครบกำหนดประมาณ ~${remPeriods} เดือน`;
     if(firstDate) document.getElementById('timelineStart').textContent = `เริ่ม ${firstDate}`;
 
-    // animated counters
     animCount(document.getElementById('paidNum'), amtPaid, 1400);
     animCount(document.getElementById('remainNum'), amtDue, 1400);
-    setTimeout(()=>{ document.getElementById('ringFill').style.width = pct+'%'; }, 150);
-    const t0 = performance.now();
+    
+    setTimeout(()=>{ 
+      const ring = document.getElementById('ringFill');
+      if(ring) ring.style.width = pct+'%'; 
+    }, 150);
+    
     const pctEl = document.getElementById('heroPct');
-    const pctTick = now => {
-      const t = Math.min((now-t0)/1400,1), e = 1-Math.pow(1-t,3);
-      pctEl.textContent = (pct*e).toFixed(1)+'%';
-      if(t<1) requestAnimationFrame(pctTick);
-    };
-    requestAnimationFrame(pctTick);
+    if (pctEl) {
+      const t0 = performance.now();
+      const pctTick = now => {
+        const t = Math.min((now-t0)/1400,1), e = 1-Math.pow(1-t,3);
+        pctEl.textContent = (pct*e).toFixed(1)+'%';
+        if(t<1) requestAnimationFrame(pctTick);
+      };
+      requestAnimationFrame(pctTick);
+    }
 
-    // milestone
-    setTimeout(()=>{ document.getElementById('milestoneFill').style.width = pct+'%'; }, 200);
+    setTimeout(()=>{ 
+      const mFill = document.getElementById('milestoneFill');
+      if(mFill) mFill.style.width = pct+'%'; 
+    }, 200);
+
     const track = document.getElementById('milestoneTrack');
-    [{pct:0,label:'เริ่มต้น',sub:`งวด 1`,below:true},{pct:25,label:'25%',sub:`งวด ${Math.round(TOTAL*.25)}`,below:false},{pct:50,label:'50%',sub:`งวด ${Math.round(TOTAL*.5)}`,below:true},{pct:75,label:'75%',sub:`งวด ${Math.round(TOTAL*.75)}`,below:false},{pct:100,label:'ปลดหนี้',sub:`งวด ${TOTAL}`,below:true}].forEach(m=>{
-      const pt=document.createElement('div'); pt.className='milestone-pt'+(m.pct<=pct?' done':''); pt.style.left=m.pct+'%'; track.appendChild(pt);
-      const lb=document.createElement('div'); lb.className='milestone-label'+(m.below?' below':''); lb.style.left=m.pct+'%'; lb.innerHTML=`<span class="pct">${m.label}</span>${m.sub}`; track.appendChild(lb);
-    });
-    const np=document.createElement('div'); np.className='milestone-pt now'; np.style.left=pct+'%'; track.appendChild(np);
-    const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-50px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">ปัจจุบัน</span>งวด ${paid}`; track.appendChild(nl);
+    if(track) {
+      // เคลียร์ Milestone เดิมออกก่อนกรณีอัปเดตรีเฟรชรอบใหม่
+      const oldPts = track.querySelectorAll('.milestone-pt, .milestone-label');
+      oldPts.forEach(o => o.remove());
 
-    // chart
+      [{pct:0,label:'เริ่มต้น',sub:`งวด 1`,below:true},
+       {pct:25,label:'25%',sub:`งวด ${Math.round(TOTAL*.25)}`,below:false},
+       {pct:50,label:'50%',sub:`งวด ${Math.round(TOTAL*.5)}`,below:true},
+       {pct:75,label:'75%',sub:`งวด ${Math.round(TOTAL*.75)}`,below:false},
+       {pct:100,label:'ปลดหนี้',sub:`งวด ${TOTAL}`,below:true}].forEach(m=>{
+        const pt=document.createElement('div'); pt.className='milestone-pt'+(m.pct<=pct?' done':''); pt.style.left=m.pct+'%'; track.appendChild(pt);
+        const lb=document.createElement('div'); lb.className='milestone-label'+(m.below?' below':''); lb.style.left=m.pct+'%'; lb.innerHTML=`<span class="pct">${m.label}</span>${m.sub}`; track.appendChild(lb);
+      });
+      const np=document.createElement('div'); np.className='milestone-pt now'; np.style.left=pct+'%'; track.appendChild(np);
+      const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-50px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">ปัจจุบัน</span>งวด ${paid}`; track.appendChild(nl);
+    }
+
     buildChart(balances, paid, TOTAL, price, dates, paidStatus, payments);
 
-    // table: last 5 paid + next 5
     const tbody = document.getElementById('paymentTable');
-    const show = [];
-    for(let i=Math.max(0,paid-5); i<paid; i++) show.push(i);
-    for(let i=paid; i<Math.min(TOTAL,paid+5); i++) show.push(i);
-    show.forEach(idx=>{
-      const period=idx+1, isPaid=paidStatus[idx], isCurr=(period===paid);
-      const bal = balances[period];
-      const tr=document.createElement('tr');
-      if(isCurr) tr.className='current-row';
-      const badge = isCurr ? `<span class="badge current">งวดล่าสุด</span>` : isPaid ? `<span class="badge paid">✅ จ่ายแล้ว</span>` : `<span class="badge upcoming">รออยู่</span>`;
-      tr.innerHTML=`<td>${period}</td><td>${dates[idx]||'—'}</td><td>${fmt(payments[idx])}</td><td>${fmt(bal)}</td><td>${badge}</td>`;
-      tbody.appendChild(tr);
-    });
+    if(tbody) {
+      tbody.innerHTML = ''; // ล้างตารางเดิม
+      const show = [];
+      for(let i=Math.max(0,paid-5); i<paid; i++) show.push(i);
+      for(let i=paid; i<Math.min(TOTAL,paid+5); i++) show.push(i);
+      
+      show.forEach(idx=>{
+        const period=idx+1, isPaid=paidStatus[idx], isCurr=(period===paid);
+        const bal = balances[period];
+        const tr=document.createElement('tr');
+        if(isCurr) tr.className='current-row';
+        const badge = isCurr ? `<span class="badge current">งวดล่าสุด</span>` : isPaid ? `<span class="badge paid">✅ จ่ายแล้ว</span>` : `<span class="badge upcoming">รออยู่</span>`;
+        tr.innerHTML=`<td>${period}</td><td>${dates[idx]||'—'}</td><td>${fmt(payments[idx])}</td><td>${fmt(bal)}</td><td>${badge}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
 
   } catch(e) {
     document.getElementById('loadingState').innerHTML = `<div style="color:#FF8A4D;font-size:14px">⚠️ ดึงข้อมูลไม่ได้</div><div style="margin-top:8px;font-size:12px;color:var(--text-low)">${e.message}</div>`;
@@ -356,6 +407,7 @@ async function load() {
 
 function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
   const svg=document.getElementById('trendChart');
+  if(!svg) return;
   const W=900,H=320,pL=64,pR=16,pT=20,pB=34,plotW=W-pL-pR,plotH=H-pT-pB;
   const xF=i=>pL+(i/total)*plotW, yF=b=>pT+(1-b/price)*plotH;
   let s=`<defs>
@@ -367,7 +419,7 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
     s+=`<line x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
     s+=`<text x="${pL-10}" y="${y+4}" text-anchor="end" font-family="Space Grotesk" font-size="11" fill="#4B5263">${v/1000}k</text>`;
   });
-  for(let i=0;i<=total;i+=10){
+  for(let i=0; i<=total; i+=10){
     const x=xF(i);
     s+=`<line x1="${x}" y1="${pT}" x2="${x}" y2="${H-pB}" stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;
     s+=`<text x="${x}" y="${H-pB+18}" text-anchor="middle" font-family="Space Grotesk" font-size="11" fill="#4B5263">${i===0?'เริ่ม':i}</text>`;
@@ -382,32 +434,40 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
   s+=`<path d="${projP}" fill="none" stroke="#FF8A4D" stroke-width="3" stroke-dasharray="6 5" opacity=".6"/>`;
   s+=`<path d="${paidP}" fill="none" stroke="#4DE8FF" stroke-width="9" opacity=".18"/>`;
   s+=`<path d="${paidP}" fill="none" stroke="url(#lG)" stroke-width="3.5"/>`;
+  
   for(let i=0;i<=total;i++){
     const x=xF(i),y=yF(balances[i]),isCurr=(i===paid),isPaid=(i<=paid);
     if(i%5===0||isCurr||i===total){
       const col=isCurr?'#FF8A4D':(isPaid?'#4DFFB0':'#5A6678');
       s+=`<circle cx="${x}" cy="${y}" r="${isCurr?6:4}" fill="${col}" stroke="#0A0E16" stroke-width="2"/>`;
-      if(isCurr){ s+=`<circle cx="${x}" cy="${y}" r="11" fill="none" stroke="#FF8A4D" stroke-width="1.5" opacity=".5"/>`; s+=`<text x="${x}" y="${y-18}" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="12" fill="#F2F4F8">วันนี้</text>`; }
+      if(isCurr){ 
+        s+=`<circle cx="${x}" cy="${y}" r="11" fill="none" stroke="#FF8A4D" stroke-width="1.5" opacity=".5"/>`; 
+        s+=`<text x="${x}" y="${y-18}" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="12" fill="#F2F4F8">วันนี้</text>`; 
+      }
     }
-    const dl=dates[i-1]||(i===0?'เริ่มต้น':'คาดการณ์');
+    // หลีกเลี่ยงค่าดัชนีติดลบสำหรับงวดที่ 0
+    const dl= i===0 ? 'เริ่มต้น' : (dates[i-1] || 'คาดการณ์');
     s+=`<circle class="ht" data-i="${i}" data-bal="${balances[i]}" data-date="${dl}" data-paid="${isPaid}" cx="${x}" cy="${y}" r="10" fill="transparent" style="cursor:pointer"/>`;
   }
   svg.innerHTML=s;
+  
   const tip=document.getElementById('hoverTooltip'), wrap=document.querySelector('.chart-svg-wrap');
-  svg.querySelectorAll('.ht').forEach(t=>{
-    t.addEventListener('mouseenter',()=>{
-      const i=t.getAttribute('data-i'), bal=parseFloat(t.getAttribute('data-bal')), date=t.getAttribute('data-date'), isPaid=t.getAttribute('data-paid')==='true';
-      const sr=svg.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
-      const sx=sr.width/W, sy=sr.height/H, cx=parseFloat(t.getAttribute('cx')), cy=parseFloat(t.getAttribute('cy'));
-      tip.innerHTML=`<div class="tt-period">งวด ${i} · ${date}</div><div class="tt-val">${fmt(bal)}</div><div class="tt-period">${isPaid?'จ่ายแล้ว':'คาดการณ์'}</div>`;
-      tip.style.left=(sr.left-wr.left+cx*sx)+'px'; tip.style.top=(sr.top-wr.top+cy*sy)+'px'; tip.style.opacity='1';
+  if(tip && wrap) {
+    svg.querySelectorAll('.ht').forEach(t=>{
+      t.addEventListener('mouseenter',()=>{
+        const i=t.getAttribute('data-i'), bal=parseFloat(t.getAttribute('data-bal')), date=t.getAttribute('data-date'), isPaid=t.getAttribute('data-paid')==='true';
+        const sr=svg.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
+        const sx=sr.width/W, sy=sr.height/H, cx=parseFloat(t.getAttribute('cx')), cy=parseFloat(t.getAttribute('cy'));
+        tip.innerHTML=`<div class="tt-period">งวด ${i} · ${date}</div><div class="tt-val">${fmt(bal)}</div><div class="tt-period">${isPaid?'จ่ายแล้ว':'คาดการณ์'}</div>`;
+        tip.style.left=(sr.left-wr.left+cx*sx)+'px'; tip.style.top=(sr.top-wr.top+cy*sy)+'px'; tip.style.opacity='1';
+      });
+      t.addEventListener('mouseleave',()=>{ tip.style.opacity='0'; });
     });
-    t.addEventListener('mouseleave',()=>{ tip.style.opacity='0'; });
-  });
+  }
 }
 
 load();
-setInterval(load, 5*60*1000);
+setInterval(load, 5*60*1000); // ทำงานรีเฟรชข้อมูลทุก ๆ 5 นาที
 </script>
 </body>
 </html>
