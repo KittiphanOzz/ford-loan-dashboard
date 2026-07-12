@@ -44,10 +44,12 @@
   .progress-top .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
   .progress-top .pct{font-family:'Space Grotesk',sans-serif;font-size:44px;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
   
-  /* เอฟเฟกต์แถบความก้าวหน้าหลักแบบมีเส้นเลเซอร์วิ่งพาดผ่าน */
+  /* เอฟเฟกต์แถบความก้าวหน้าหลักพร้อมหัวเลเซอร์เรืองแสง */
   .ring-track{position:relative;width:100%;height:14px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
-  .ring-fill{position:absolute;top:0;left:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:10px;box-shadow:0 0 20px rgba(77,232,255,.5);transition:width 1.6s cubic-bezier(.16,1,.3,1);overflow:hidden;}
-  .ring-fill::after {content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.4),transparent);animation:laserRun 2.5s infinite linear;}
+  .ring-fill{position:absolute;top:0;left:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:10px;box-shadow:0 0 20px rgba(77,232,255,.4);transition:width 1.6s cubic-bezier(.16,1,.3,1);overflow:hidden;}
+  .ring-fill::after {content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:laserRun 2.5s infinite linear;}
+  /* หัวนำเลเซอร์ที่ปลายแถบวิ่ง */
+  .ring-fill::before {content:'';position:absolute;right:0;top:0;width:8px;height:100%;background:#fff;box-shadow:0 0 12px 2px #fff, 0 0 20px 4px var(--cyan);}
   @keyframes laserRun {0% {left:-100%} 100% {left:200%}}
 
   .ring-marks{display:flex;justify-content:space-between;margin-top:8px}
@@ -76,28 +78,39 @@
   .legend-row{display:flex;gap:22px;flex-wrap:wrap;margin-top:6px;padding-top:16px;border-top:1px solid var(--glass-border)}
   .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-mid)}
   .legend-line{width:18px;height:3px;border-radius:2px}
+  
+  /* ระบบ Grid Cards แผงควบคุมและเอฟเฟกต์ Glow นีออนวิ่งรอบขอบตามสถานะสี */
   .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
   @media(max-width:720px){.grid{grid-template-columns:1fr 1fr}}
-  .card{padding:18px 16px;transition:transform .25s,border-color .25s}
-  .card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.18)}
+  .card{padding:18px 16px;transition:transform .25s, border-color .25s, box-shadow .25s;position:relative;overflow:hidden;}
+  
+  /* แบ่งสไตล์การเรืองแสงตามประเภทข้อมูลอย่างมีมิติ */
+  .card.card-cyan:hover { border-color: rgba(77,232,255,.4); box-shadow: 0 0 20px rgba(77,232,255,.15); }
+  .card.card-green:hover { border-color: rgba(77,255,176,.4); box-shadow: 0 0 20px rgba(77,255,176,.15); }
+  .card.card-violet:hover { border-color: rgba(167,139,250,.4); box-shadow: 0 0 20px rgba(167,139,250,.15); }
+  .card.card-orange:hover { border-color: rgba(255,138,77,.4); box-shadow: 0 0 20px rgba(255,138,77,.15); }
+
   .card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-low);margin-bottom:8px}
   .card .v{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:600;line-height:1.1}
   .card .sub{font-size:11.5px;color:var(--text-mid);margin-top:4px}
+  
   .timeline-glass{padding:22px 26px 30px;margin-bottom:16px}
   .timeline-glass { overflow-x: auto; }
   .timeline-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
   .timeline-head .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
   .timeline-head .v{font-size:12px;color:var(--text-low)}
   
-  /* เอฟเฟกต์แถบไทม์ไลน์ปลดหนี้ มีแสงวิ่งพาดผ่านแบบเลเซอร์ */
+  /* เอฟเฟกต์แถบไทม์ไลน์ปลดหนี้ มีแสงวิ่งพาดผ่านแบบเลเซอร์พร้อมหัวนำ */
   .milestone-track{position:relative;height:4px;background:rgba(255,255,255,.07);border-radius:4px;margin:50px 6px 36px;min-width:600px;}
   .milestone-fill{position:absolute;top:0;left:0;bottom:0;border-radius:4px;background:linear-gradient(90deg,var(--violet),var(--cyan));width:0%;transition:width 1.8s cubic-bezier(.16,1,.3,1);box-shadow:0 0 16px rgba(77,232,255,.45);overflow:hidden;}
   .milestone-fill::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);animation:laserRun 3s infinite linear;}
-  
+  /* หัวนำเลเซอร์ของเส้นไทม์ไลน์หลัก */
+  .milestone-fill::before{content:'';position:absolute;right:0;top:0;width:6px;height:100%;background:#fff;box-shadow:0 0 8px #fff, 0 0 14px var(--cyan);}
+
   .milestone-pt{position:absolute;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#1c2230;border:2px solid var(--text-low)}
   .milestone-pt.done{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 10px rgba(77,232,255,.6)}
   
-  /* อัปเกรดจุดปัจจุบันในไทม์ไลน์ให้กระพริบแนว Soft Breathing สวยนุ่มนวลขึ้น */
+  /* จุดปัจจุบันกระพริบแนว Soft Breathing เป็นจังหวะชีพจรนุ่มนวล */
   .milestone-pt.now{width:18px;height:18px;background:var(--orange);border-color:var(--orange);animation:nowPulse 2s ease-in-out infinite}
   @keyframes nowPulse{0%,100%{box-shadow:0 0 0 4px rgba(255,138,77,.15),0 0 10px rgba(255,138,77,.5);opacity:1;}50%{box-shadow:0 0 0 12px rgba(255,138,77,.05),0 0 22px rgba(255,138,77,.9);opacity:.85;}}
   
@@ -173,7 +186,7 @@
             </div>
             <div class="stat-text">
               <div class="lbl">จ่ายแล้วสะสม</div>
-              <div class="num" id="paidNum" style="color:var(--green)">฿0</div>
+              <div class="num" id="paidNum" style="color:var(--green); text-shadow: 0 0 10px rgba(77,255,176,.2);">฿0</div>
             </div>
           </div>
         </div>
@@ -184,7 +197,7 @@
             </div>
             <div class="stat-text">
               <div class="lbl">คงเหลือต้องจ่าย</div>
-              <div class="num" id="remainNum" style="color:var(--orange)">฿0</div>
+              <div class="num" id="remainNum" style="color:var(--orange); text-shadow: 0 0 10px rgba(255,138,77,.2);">฿0</div>
             </div>
           </div>
         </div>
@@ -210,23 +223,24 @@
       </div>
     </div>
 
+    <!-- เพิ่มคลาสเอฟเฟกต์ Glow Border แยกตามคู่โทนสีเด่นสำหรับการ์ดแต่ละใบ -->
     <div class="grid">
-      <div class="card glass fade-in" style="animation-delay:.25s">
+      <div class="card glass card-orange fade-in" style="animation-delay:.25s">
         <div class="k">งวดปัจจุบัน</div>
         <div class="v" id="cardPeriod">—</div>
         <div class="sub" id="cardDate">—</div>
       </div>
-      <div class="card glass fade-in" style="animation-delay:.3s">
+      <div class="card glass card-cyan fade-in" style="animation-delay:.3s">
         <div class="k">ค่าผ่อน/เดือน</div>
         <div class="v" id="cardPayment" style="color:var(--cyan)">—</div>
         <div class="sub" id="cardPaymentSub">—</div>
       </div>
-      <div class="card glass fade-in" style="animation-delay:.35s">
+      <div class="card glass card-green fade-in" style="animation-delay:.35s">
         <div class="k">% ที่จ่ายแล้ว</div>
         <div class="v" id="cardPct" style="color:var(--green)">—</div>
         <div class="sub">ของราคารถทั้งหมด</div>
       </div>
-      <div class="card glass fade-in" style="animation-delay:.4s">
+      <div class="card glass card-violet fade-in" style="animation-delay:.4s">
         <div class="k">เหลืออีก</div>
         <div class="v" id="cardRemain" style="color:var(--violet)">—</div>
         <div class="sub" id="cardDue">—</div>
@@ -433,9 +447,7 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
   for(let i=paid+1;i<=total;i++) projP+=` L ${xF(i)} ${yF(balances[i])}`;
   s+=`<path d="${projP}" fill="none" stroke="#FF8A4D" stroke-width="3" stroke-dasharray="6 5" opacity=".6"/>`;
   
-  // อัปเกรดเส้นเบื้องหลังกราฟหลักให้มีมิติเรืองแสง
   s+=`<path d="${paidP}" fill="none" stroke="#4DE8FF" stroke-width="9" opacity=".18"/>`;
-  // เพิ่มเอฟเฟกต์กระแสเส้นวิ่งบนกราฟ (Dash-animation) ลื่นไหลดูเทคโนโลยีมากยิ่งขึ้น
   s+=`<path d="${paidP}" fill="none" stroke="url(#lG)" stroke-width="3.5" stroke-dasharray="10 6" style="animation: chartDashRun 1s linear infinite;"/>`;
   
   for(let i=0;i<=total;i++){
