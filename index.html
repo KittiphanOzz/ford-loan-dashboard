@@ -6,7 +6,7 @@
   <title>Ford Loan Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sukhumvit+Tadmai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0A0E1A;
@@ -22,7 +22,7 @@
     body {
       background-color: var(--bg);
       color: var(--text-main);
-      font-family: 'Space Grotesk', 'Sukhumvit Tadmai', sans-serif;
+      font-family: 'Space Grotesk', sans-serif;
       padding: 24px;
       display: flex;
       flex-direction: column;
@@ -34,9 +34,7 @@
     header h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
     header p { color: var(--text-low); font-size: 13px; }
     
-    #loadingState {
-      padding: 60px; text-align: center; color: var(--text-low); font-size: 16px;
-    }
+    #loadingState { padding: 60px; text-align: center; color: var(--text-low); font-size: 16px; }
     #mainContent { display: none; }
 
     .grid-top {
@@ -45,12 +43,7 @@
       gap: 16px;
       margin-bottom: 24px;
     }
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 20px;
-    }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 20px; }
     .card-label { font-size: 12px; color: var(--text-low); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
     .card-val { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
     .card-sub { font-size: 12px; color: var(--text-low); }
@@ -75,9 +68,7 @@
     tr.current-row { background: rgba(255, 138, 77, 0.05); font-weight: 600; }
     tr.current-row td { border-top: 1px solid rgba(255, 138, 77, 0.2); border-bottom: 1px solid rgba(255, 138, 77, 0.2); }
     
-    .badge {
-      display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 500;
-    }
+    .badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; }
     .badge.paid { background: rgba(77, 255, 176, 0.1); color: var(--green); }
     .badge.upcoming { background: rgba(255, 255, 255, 0.04); color: var(--text-low); }
     .badge.current { background: rgba(255, 138, 77, 0.15); color: var(--orange); }
