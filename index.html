@@ -1,129 +1,364 @@
-async function load() {
-  try {
-    let rows;
-    try {
-      const res = await fetch(API);
-      if(!res.ok) throw new Error("Network response not ok");
-      rows = await res.json();
-    } catch (apiErr) {
-      console.warn("API Error, switching to mock data:", apiErr.message);
-      rows = generateMockData();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ford Loan Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sukhumvit+Tadmai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0A0E1A;
+      --card-bg: #131A2C;
+      --card-border: rgba(255, 255, 255, 0.05);
+      --text-main: #F2F4F8;
+      --text-low: #7E8B9B;
+      --cyan: #4DE8FF;
+      --green: #4DFFB0;
+      --orange: #FF8A4D;
     }
-
-    const r = rows; 
-
-    const price      = parseFloat(r[1]?.[1]) || 849780;       
-    const stdPayment = parseFloat(r[2]?.[1]) || 14163;        
-    const lastPay    = parseFloat(r[2]?.[TOTAL]) || 14123;       
-    const amtPaid    = parseFloat(r[6]?.[1]) || 283260;       
-    const amtDue     = parseFloat(r[7]?.[1]) || 566520;       
-    const remPeriods = parseInt(r[5]?.[1])   || 40;            
-
-    let paid = 0;
-    const paidStatus = [];
-    for(let i=1; i<=TOTAL; i++) {
-      const cell = r[4]?.[i] || '';
-      const isPaid = cell.toString().includes('✅') || cell.toString().toLowerCase().includes('paid');
-      paidStatus.push(isPaid);
-      if(isPaid) paid++;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: 'Space Grotesk', 'Sukhumvit Tadmai', sans-serif;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
     }
-
-    const payments = [];
-    for(let i=1; i<=TOTAL; i++) payments.push(parseFloat(r[2]?.[i]) || stdPayment);
-
-    const dates = [];
-    for(let i=1; i<=TOTAL; i++) {
-      dates.push(formatDate(r[8]?.[i]));
-    }
-
-    const balances = [price];
-    for(let i=1; i<=TOTAL; i++) balances.push(Math.max(price - payments.slice(0,i).reduce((a,b)=>a+b,0), 0));
-
-    const pct = (paid/TOTAL)*100;
-    const lastDate = dates[paid-1] || '—';
-    const firstDate = dates[0] || '—';
-
-    document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('mainContent').style.display = 'block';
-
-    document.getElementById('priceVal').textContent = fmt(price);
-    document.getElementById('remainNow').textContent = fmt(balances[paid]);
-    document.getElementById('remainNowLabel').textContent = `Remaining Balance at Period ${paid}`;
-    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('en-US');
-    document.getElementById('cardPeriod').textContent = `${paid} / ${TOTAL}`;
-    document.getElementById('cardDate').textContent = lastDate;
-    document.getElementById('cardPayment').textContent = fmt(stdPayment);
-    document.getElementById('cardPaymentSub').textContent = `Final Period: ${fmt(lastPay)}`;
-    document.getElementById('cardPct').textContent = pct.toFixed(1) + '%';
-    document.getElementById('cardRemain').textContent = `${remPeriods} Periods`;
-    document.getElementById('cardDue').textContent = `Matures in approx. ~${remPeriods} months`;
-    if(firstDate) document.getElementById('timelineStart').textContent = `Started: ${firstDate}`;
-
-    animCount(document.getElementById('paidNum'), amtPaid, 1400);
-    animCount(document.getElementById('remainNum'), amtDue, 1400);
+    .container { width: 100%; max-width: 1000px; }
+    header { margin-bottom: 24px; }
+    header h1 { font-size: 24px; font-weight: 600; margin-bottom: 4px; }
+    header p { color: var(--text-low); font-size: 13px; }
     
-    setTimeout(()=>{ 
-      const ring = document.getElementById('ringFill');
-      if(ring) ring.style.width = pct+'%'; 
-    }, 150);
+    #loadingState {
+      padding: 60px; text-align: center; color: var(--text-low); font-size: 16px;
+    }
+    #mainContent { display: none; }
+
+    .grid-top {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 20px;
+    }
+    .card-label { font-size: 12px; color: var(--text-low); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card-val { font-size: 26px; font-weight: 700; margin-bottom: 4px; }
+    .card-sub { font-size: 12px; color: var(--text-low); }
+
+    .chart-card { margin-bottom: 24px; position: relative; }
+    .chart-svg-wrap { width: 100%; overflow-x: auto; position: relative; }
+    svg { display: block; width: 100%; height: auto; min-width: 750px; }
     
-    const pctEl = document.getElementById('heroPct');
-    if (pctEl) {
+    .tooltip {
+      position: absolute; background: rgba(10, 14, 26, 0.95);
+      border: 1px solid rgba(255,255,255,0.15); padding: 8px 12px;
+      border-radius: 8px; pointer-events: none; opacity: 0;
+      transform: translate(-50%, -120%); transition: opacity 0.15s; z-index: 10;
+    }
+    .tt-period { font-size: 11px; color: var(--text-low); }
+    .tt-val { font-size: 15px; font-weight: 700; color: var(--cyan); margin: 2px 0; }
+
+    .table-card { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+    th { color: var(--text-low); font-weight: 500; padding: 12px 16px; border-bottom: 1px solid var(--card-border); font-size: 12px; text-transform: uppercase; }
+    td { padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.02); }
+    tr.current-row { background: rgba(255, 138, 77, 0.05); font-weight: 600; }
+    tr.current-row td { border-top: 1px solid rgba(255, 138, 77, 0.2); border-bottom: 1px solid rgba(255, 138, 77, 0.2); }
+    
+    .badge {
+      display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 500;
+    }
+    .badge.paid { background: rgba(77, 255, 176, 0.1); color: var(--green); }
+    .badge.upcoming { background: rgba(255, 255, 255, 0.04); color: var(--text-low); }
+    .badge.current { background: rgba(255, 138, 77, 0.15); color: var(--orange); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>Ford Everest Sport</h1>
+      <p>Loan Amortization Schedule & Tracking</p>
+    </header>
+
+    <div id="loadingState">Loading Dashboard Data...</div>
+
+    <div id="mainContent">
+      <div class="grid-top">
+        <div class="card">
+          <div class="card-label">Total Loan Price</div>
+          <div class="card-val" id="priceVal" style="color:var(--text-main)">฿0</div>
+          <div class="card-sub" id="timelineStart">Started: —</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Total Amount Paid</div>
+          <div class="card-val" id="paidNum" style="color:var(--green)">฿0</div>
+          <div class="card-sub" id="cardPeriod">0 / 60</div>
+        </div>
+        <div class="card">
+          <div class="card-label" id="remainNowLabel">Remaining Balance</div>
+          <div class="card-val" id="remainNow" style="color:var(--cyan)">฿0</div>
+          <div class="card-sub" id="cardDate">—</div>
+        </div>
+        <div class="card">
+          <div class="card-label">Monthly Payment</div>
+          <div class="card-val" id="cardPayment" style="color:var(--orange)">฿0</div>
+          <div class="card-sub" id="cardPaymentSub">Final Period: ฿0</div>
+        </div>
+      </div>
+
+      <div class="card chart-card">
+        <div class="card-label">Balance Trend & Projections</div>
+        <div class="chart-svg-wrap">
+          <svg id="trendChart" viewBox="0 0 900 320"></svg>
+          <div class="tooltip" id="hoverTooltip"></div>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <div class="card-label">Payment Schedule (Nearest Window)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Pd</th>
+              <th>Due Date</th>
+              <th>Payment</th>
+              <th>Remaining</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="paymentTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'https://script.google.com/macros/s/AKfycbzGRE7SmAQ_TFz-IPpWNnj6At8swAu6BA91Vs8tA-sxTzZIh-5p2s2o0xvlYqg-efVk/exec';
+    const TOTAL = 60;
+
+    const fmt = n => '฿' + Math.round(n).toLocaleString('en-US');
+
+    function formatDate(dateStr) {
+      if (!dateStr || dateStr === '—') return '—';
+      try {
+        let s = dateStr.toString().trim();
+        if (s.includes('T')) {
+          s = s.split('T')[0]; 
+        }
+        const parts = s.split('-');
+        if (parts.length === 3) {
+          const year = parseInt(parts[0]);
+          const month = parseInt(parts[1]) - 1;
+          const day = parseInt(parts[2]);
+          const d = new Date(year, month, day);
+          if (!isNaN(d.getTime())) {
+            return d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+          }
+        }
+        const d2 = new Date(s);
+        if (!isNaN(d2.getTime())) {
+          return d2.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+        return s;
+      } catch(e) {
+        return dateStr;
+      }
+    }
+
+    function animCount(el, target, ms, pre='฿') {
+      if (!el) return;
       const t0 = performance.now();
-      const pctTick = now => {
-        const t = Math.min((now-t0)/1400,1), e = 1-Math.pow(1-t,3);
-        pctEl.textContent = (pct*e).toFixed(1)+'%';
-        if(t<1) requestAnimationFrame(pctTick);
+      const tick = now => {
+        const t = Math.min((now-t0)/ms, 1), e = 1-Math.pow(1-t,3);
+        el.textContent = pre + Math.round(target*e).toLocaleString('en-US');
+        if(t<1) requestAnimationFrame(tick);
       };
-      requestAnimationFrame(pctTick);
+      requestAnimationFrame(tick);
     }
 
-    setTimeout(()=>{ 
-      const mFill = document.getElementById('milestoneFill');
-      if(mFill) mFill.style.width = pct+'%'; 
-    }, 200);
+    function generateMockData() {
+      const mock = [];
+      mock[0] = ["Ford Everest Sport Summary Sheet"];
+      mock[1] = ["Price", 849780];
+      mock[2] = ["Payment"];
+      mock[3] = ["Period"];
+      mock[4] = ["Status"];
+      mock[5] = ["RemPeriod", 40];
+      mock[6] = ["AmtPaid", 283260];
+      mock[7] = ["AmtDue", 566520];
+      mock[8] = ["Dates"];
 
-    const track = document.getElementById('milestoneTrack');
-    if(track) {
-      const oldPts = track.querySelectorAll('.milestone-pt, .milestone-label');
-      oldPts.forEach(o => o.remove());
+      const currentPaidCount = 20; 
+      let baseDate = new Date(2025, 0, 15);
+      for (let i = 1; i <= TOTAL; i++) {
+        mock[2][i] = i === 60 ? 14123 : 14163;
+        mock[3][i] = i;
+        mock[4][i] = i <= currentPaidCount ? "✅ PAID" : "UPCOMING";
+        let d = new Date(baseDate);
+        d.setMonth(d.getMonth() + (i - 1));
+        mock[8][i] = d.toISOString();
+      }
+      return mock;
+    }
 
-      [{pct:0,label:'Start',sub:`Pd. 1`,below:true},
-       {pct:25,label:'25%',sub:`Pd. ${Math.round(TOTAL*.25)}`,below:false},
-       {pct:50,label:'50%',sub:`Pd. ${Math.round(TOTAL*.5)}`,below:true},
-       {pct:75,label:'75%',sub:`Pd. ${Math.round(TOTAL*.75)}`,below:false},
-       {pct:100,label:'Cleared',sub:`Pd. ${TOTAL}`,below:true}].forEach(m=>{
-        const pt=document.createElement('div'); pt.className='milestone-pt'+(m.pct<=pct?' done':''); pt.style.left=m.pct+'%'; track.appendChild(pt);
-        const lb=document.createElement('div'); lb.className='milestone-label'+(m.below?' below':''); lb.style.left=m.pct+'%'; lb.innerHTML=`<span class="pct">${m.label}</span>${m.sub}`; track.appendChild(lb);
+    async function load() {
+      try {
+        let rows;
+        try {
+          const res = await fetch(API);
+          if(!res.ok) throw new Error("Network response not ok");
+          rows = await res.json();
+        } catch (apiErr) {
+          console.warn("API Error, switching to mock data:", apiErr.message);
+          rows = generateMockData();
+        }
+
+        const r = rows; 
+
+        const price      = parseFloat(r[1]?.[1]) || 849780;       
+        const stdPayment = parseFloat(r[2]?.[1]) || 14163;        
+        const lastPay    = parseFloat(r[2]?.[TOTAL]) || 14123;       
+        const amtPaid    = parseFloat(r[6]?.[1]) || 283260;       
+        const amtDue     = parseFloat(r[7]?.[1]) || 566520;       
+
+        let paid = 0;
+        const paidStatus = [];
+        for(let i=1; i<=TOTAL; i++) {
+          const cell = r[4]?.[i] || '';
+          const isPaid = cell.toString().includes('✅') || cell.toString().toLowerCase().includes('paid');
+          paidStatus.push(isPaid);
+          if(isPaid) paid++;
+        }
+
+        const payments = [];
+        for(let i=1; i<=TOTAL; i++) payments.push(parseFloat(r[2]?.[i]) || stdPayment);
+
+        const dates = [];
+        for(let i=1; i<=TOTAL; i++) {
+          dates.push(formatDate(r[8]?.[i]));
+        }
+
+        const balances = [price];
+        for(let i=1; i<=TOTAL; i++) balances.push(Math.max(price - payments.slice(0,i).reduce((a,b)=>a+b,0), 0));
+
+        const pct = (paid/TOTAL)*100;
+        const lastDate = dates[paid-1] || '—';
+        const firstDate = dates[0] || '—';
+
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+
+        document.getElementById('priceVal').textContent = fmt(price);
+        document.getElementById('remainNow').textContent = fmt(balances[paid]);
+        document.getElementById('remainNowLabel').textContent = `Balance at Period ${paid}`;
+        document.getElementById('cardPeriod').textContent = `${paid} / ${TOTAL} Periods`;
+        document.getElementById('cardDate').textContent = `Last Paid: ${lastDate}`;
+        document.getElementById('cardPayment').textContent = fmt(stdPayment);
+        document.getElementById('cardPaymentSub').textContent = `Final Period: ${fmt(lastPay)}`;
+        if(firstDate) document.getElementById('timelineStart').textContent = `Started: ${firstDate}`;
+
+        animCount(document.getElementById('paidNum'), amtPaid, 1400);
+        
+        buildChart(balances, paid, TOTAL, price, dates, paidStatus, payments);
+
+        const tbody = document.getElementById('paymentTable');
+        if(tbody) {
+          tbody.innerHTML = ''; 
+          const show = [];
+          for(let i=Math.max(0,paid-5); i<paid; i++) show.push(i);
+          for(let i=paid; i<Math.min(TOTAL,paid+5); i++) show.push(i);
+          
+          show.forEach(idx=>{
+            const period=idx+1, isPaid=paidStatus[idx], isCurr=(period===paid);
+            const bal = balances[period];
+            const tr=document.createElement('tr');
+            if(isCurr) tr.className='current-row';
+            
+            const badge = isCurr ? `<span class="badge current">Latest</span>` : isPaid ? `<span class="badge paid">✅ Paid</span>` : `<span class="badge upcoming">Upcoming</span>`;
+            
+            tr.innerHTML=`<td>${period}</td><td>${dates[idx]||'—'}</td><td>${fmt(payments[idx])}</td><td>${fmt(bal)}</td><td>${badge}</td>`;
+            tbody.appendChild(tr);
+          });
+        }
+
+      } catch(e) {
+        document.getElementById('loadingState').innerHTML = `<div style="color:#FF8A4D;font-size:14px">⚠️ Data Fetch Failed</div><div style="margin-top:8px;font-size:12px;color:var(--text-low)">${e.message}</div>`;
+      }
+    }
+
+    function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
+      const svg=document.getElementById('trendChart');
+      if(!svg) return;
+      const W=900,H=320,pL=64,pR=16,pT=20,pB=34,plotW=W-pL-pR,plotH=H-pT-pB;
+      const xF=i=>pL+(i/total)*plotW, yF=b=>pT+(1-b/price)*plotH;
+      let s=`<defs>
+        <linearGradient id="aG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4DE8FF" stop-opacity=".18"/><stop offset="100%" stop-color="#4DE8FF" stop-opacity="0"/></linearGradient>
+        <linearGradient id="lG" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4DFFB0"/><stop offset="100%" stop-color="#4DE8FF"/></linearGradient>
+      </defs>`;
+      [0,200000,400000,600000,800000].forEach(v=>{
+        const y=yF(v);
+        s+=`<line x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
+        s+=`<text x="${pL-10}" y="${y+4}" text-anchor="end" font-family="Space Grotesk" font-size="11" fill="#4B5263">${v/1000}k</text>`;
       });
-      const np=document.createElement('div'); np.className='milestone-pt now'; np.style.left=pct+'%'; track.appendChild(np);
-      const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-50px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">Current</span>Pd. ${paid}`; track.appendChild(nl);
-    }
-
-    // จุดแก้ไข: เปลี่ยนตรงนี้จาก total เป็น TOTAL ตัวใหญ่ครับ
-    buildChart(balances, paid, TOTAL, price, dates, paidStatus, payments);
-
-    const tbody = document.getElementById('paymentTable');
-    if(tbody) {
-      tbody.innerHTML = ''; 
-      const show = [];
-      for(let i=Math.max(0,paid-5); i<paid; i++) show.push(i);
-      for(let i=paid; i<Math.min(TOTAL,paid+5); i++) show.push(i);
+      for(let i=0; i<=total; i+=10){
+        const x=xF(i);
+        s+=`<line x1="${x}" y1="${pT}" x2="${x}" y2="${H-pB}" stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;
+        s+=`<text x="${x}" y="${H-pB+18}" text-anchor="middle" font-family="Space Grotesk" font-size="11" fill="#4B5263">${i===0?'Start':i}</text>`;
+      }
+      let full=`M ${xF(0)} ${yF(balances[0])}`;
+      for(let i=1;i<=total;i++) full+=` L ${xF(i)} ${yF(balances[i])}`;
+      s+=`<path d="${full} L ${xF(total)} ${H-pB} L ${xF(0)} ${H-pB} Z" fill="url(#aG)"/>`;
+      let paidP=`M ${xF(0)} ${yF(balances[0])}`;
+      for(let i=1;i<=paid;i++) paidP+=` L ${xF(i)} ${yF(balances[i])}`;
+      let projP=`M ${xF(paid)} ${yF(balances[paid])}`;
+      for(let i=paid+1;i<=total;i++) projP+=` L ${xF(i)} ${yF(balances[i])}`;
+      s+=`<path d="${projP}" fill="none" stroke="#FF8A4D" stroke-width="3" stroke-dasharray="6 5" opacity=".6"/>`;
+      s+=`<path d="${paidP}" fill="none" stroke="#4DE8FF" stroke-width="9" opacity=".18"/>`;
+      s+=`<path d="${paidP}" fill="none" stroke="url(#lG)" stroke-width="3.5"/>`;
       
-      show.forEach(idx=>{
-        const period=idx+1, isPaid=paidStatus[idx], isCurr=(period===paid);
-        const bal = balances[period];
-        const tr=document.createElement('tr');
-        if(isCurr) tr.className='current-row';
-        
-        const badge = isCurr ? `<span class="badge current">Latest</span>` : isPaid ? `<span class="badge paid">✅ Paid</span>` : `<span class="badge upcoming">Upcoming</span>`;
-        
-        tr.innerHTML=`<td>${period}</td><td>${dates[idx]||'—'}</td><td>${fmt(payments[idx])}</td><td>${fmt(bal)}</td><td>${badge}</td>`;
-        tbody.appendChild(tr);
-      });
+      for(let i=0;i<=total;i++){
+        const x=xF(i),y=yF(balances[i]),isCurr=(i===paid),isPaid=(i<=paid);
+        if(i%5===0||isCurr||i===total){
+          const col=isCurr?'#FF8A4D':(isPaid?'#4DFFB0':'#5A6678');
+          s+=`<circle cx="${x}" cy="${y}" r="${isCurr?6:4}" fill="${col}" stroke="#0A0E16" stroke-width="2"/>`;
+          if(isCurr){ 
+            s+=`<circle cx="${x}" cy="${y}" r="11" fill="none" stroke="#FF8A4D" stroke-width="1.5" opacity=".5"/>`; 
+            s+=`<text x="${x}" y="${y-18}" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="12" fill="#F2F4F8">Now</text>`; 
+          }
+        }
+        const dl= i===0 ? 'Start' : (dates[i-1] || 'Projection');
+        s+=`<circle class="ht" data-i="${i}" data-bal="${balances[i]}" data-date="${dl}" data-paid="${isPaid}" cx="${x}" cy="${y}" r="10" fill="transparent" style="cursor:pointer"/>`;
+      }
+      svg.innerHTML=s;
+      
+      const tip=document.getElementById('hoverTooltip'), wrap=document.querySelector('.chart-svg-wrap');
+      if(tip && wrap) {
+        svg.querySelectorAll('.ht').forEach(t=>{
+          t.addEventListener('mouseenter',()=>{
+            const i=t.getAttribute('data-i'), bal=parseFloat(t.getAttribute('data-bal')), date=t.getAttribute('data-date'), isPaid=t.getAttribute('data-paid')==='true';
+            const sr=svg.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
+            const sx=sr.width/W, sy=sr.height/H, cx=parseFloat(t.getAttribute('cx')), cy=parseFloat(t.getAttribute('cy'));
+            tip.innerHTML=`<div class="tt-period">Period ${i} · ${date}</div><div class="tt-val">${fmt(bal)}</div><div class="tt-period">${isPaid?'Paid':'Estimated'}</div>`;
+            tip.style.left=(sr.left-wr.left+cx*sx)+'px'; tip.style.top=(sr.top-wr.top+cy*sy)+'px'; tip.style.opacity='1';
+          });
+          t.addEventListener('mouseleave',()=>{ tip.style.opacity='0'; });
+        });
+      }
     }
 
-  } catch(e) {
-    document.getElementById('loadingState').innerHTML = `<div style="color:#FF8A4D;font-size:14px">⚠️ Data Fetch Failed</div><div style="margin-top:8px;font-size:12px;color:var(--text-low)">${e.message}</div>`;
-  }
-}
+    load();
+    setInterval(load, 5*60*1000); 
+  </script>
+</body>
+</html>
