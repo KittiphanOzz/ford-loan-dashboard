@@ -88,18 +88,27 @@
   .milestone-label{position:absolute;top:-34px;transform:translateX(-50%);font-size:10px;color:var(--text-low);white-space:nowrap;text-align:center;font-family:'Space Grotesk',sans-serif}
   .milestone-label .pct{color:var(--text-mid);font-weight:600;display:block;font-size:12px;margin-bottom:1px}
   .milestone-label.below{top:22px}
+  
+  /* ปรับแต่งส่วนตารางให้ Scroll ย้อนหลัง-ล่วงหน้าได้ */
   .table-glass{padding:22px 20px}
   .table-head{margin-bottom:14px}
   .table-head .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
-  .table-wrap{overflow-x:auto}
+  .table-wrap{overflow-x:auto; overflow-y:auto; max-height:400px; position:relative;}
+  /* ปรับแต่ง Scrollbar ของตารางให้เข้ากับธีมมืด */
+  .table-wrap::-webkit-scrollbar {width:6px; height:6px;}
+  .table-wrap::-webkit-scrollbar-track {background:rgba(255,255,255,.01); border-radius:4px;}
+  .table-wrap::-webkit-scrollbar-thumb {background:rgba(255,255,255,.1); border-radius:4px;}
+  .table-wrap::-webkit-scrollbar-thumb:hover {background:rgba(255,255,255,.2);}
+  
   table{width:100%;border-collapse:collapse;font-size:13px}
-  thead th{font-family:'Space Grotesk',sans-serif;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-low);padding:8px 10px;border-bottom:1px solid var(--glass-border);text-align:right}
+  thead th{font-family:'Space Grotesk',sans-serif;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-low);padding:10px 10px;border-bottom:1px solid var(--glass-border);text-align:right; position:sticky; top:0; background:#0b0e17; z-index:2;}
   thead th:first-child{text-align:left}
   tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
   tbody tr:hover{background:rgba(255,255,255,.03)}
-  tbody td{padding:7px 10px;text-align:right;font-family:'Space Grotesk',sans-serif;color:var(--text-mid)}
+  tbody td{padding:10px 10px;text-align:right;font-family:'Space Grotesk',sans-serif;color:var(--text-mid)}
   tbody td:first-child{text-align:left}
-  tbody tr.current-row td{color:var(--text-hi)}
+  tbody tr.current-row {background:rgba(255,138,77,.06);}
+  tbody tr.current-row td{color:var(--text-hi); font-weight:600;}
   .badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:600}
   .badge.paid{background:rgba(77,255,176,.12);color:var(--green)}
   .badge.current{background:rgba(255,138,77,.14);color:var(--orange)}
@@ -221,8 +230,8 @@
     </div>
 
     <div class="table-glass glass fade-in" style="animation-delay:.5s">
-      <div class="table-head"><div class="h">ประวัติการจ่ายรายงวด</div></div>
-      <div class="table-wrap">
+      <div class="table-head"><div class="h">ประวัติการจ่ายรายงวด (เลื่อนดูขึ้น-ลงได้ครบ 60 งวด)</div></div>
+      <div class="table-wrap" id="tableWrapper">
         <table>
           <thead><tr><th>งวดที่</th><th>วันที่</th><th>ยอดชำระ</th><th>ยอดคงเหลือ</th><th>สถานะ</th></tr></thead>
           <tbody id="paymentTable"></tbody>
@@ -240,18 +249,12 @@ const TOTAL = 60;
 
 const fmt = n => '฿' + Math.round(n).toLocaleString('en-US');
 
-// ฟังก์ชันดักจับและหั่นข้อมูลตั้งแต่ตัว T ทิ้งเพื่อให้เหลือแต่วันที่สั้นๆ
 function formatDate(dateStr) {
   if (!dateStr || dateStr.toString().trim() === '' || dateStr === '—') return '—';
   try {
     let s = dateStr.toString().trim();
+    if (s.includes('T')) s = s.split('T')[0];
     
-    // ตัดเอาเฉพาะข้อความก่อนหน้าอักษร T ออกทันที
-    if (s.includes('T')) {
-      s = s.split('T')[0];
-    }
-    
-    // ตรวจสอบฟอร์แมต yyyy-mm-dd หลังหั่นแล้ว
     const parts = s.split('-');
     if (parts.length === 3) {
       const year = parseInt(parts[0]);
@@ -268,9 +271,7 @@ function formatDate(dateStr) {
       return d2.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
     }
     return s;
-  } catch(e) {
-    return dateStr;
-  }
+  } catch(e) { return dateStr; }
 }
 
 function animCount(el, target, ms, pre='฿') {
@@ -286,14 +287,12 @@ function animCount(el, target, ms, pre='฿') {
 async function load() {
   try {
     const res = await fetch(API);
-    const rows = await res.json();
-    const r = rows; 
+    const r = await res.json();
 
     const price      = parseFloat(r[1]?.[1]) || 849780;       
     const stdPayment = parseFloat(r[2]?.[1]) || 14163;        
     const lastPay    = parseFloat(r[2]?.[59]) || 14123;       
     const amtPaid    = parseFloat(r[6]?.[1]) || 283260;       
-    const amtDue     = parseFloat(r[7]?.[1]) || 566520;       
     const remPeriods = parseInt(r[5]?.[1])   || 40;           
 
     let paid = 0;
@@ -359,22 +358,36 @@ async function load() {
     const np=document.createElement('div'); np.className='milestone-pt now'; np.style.left=pct+'%'; track.appendChild(np);
     const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-50px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">ปัจจุบัน</span>งวด ${paid}`; track.appendChild(nl);
 
-    buildChart(balances, paid, total, price, dates, paidStatus, payments);
+    buildChart(balances, paid, TOTAL, price, dates, paidStatus, payments);
 
+    // วาดตารางครบทั้ง 60 งวด
     const tbody = document.getElementById('paymentTable');
     tbody.innerHTML = ''; 
-    const show = [];
-    for(let i=Math.max(0,paid-5); i<paid; i++) show.push(i);
-    for(let i=paid; i<Math.min(TOTAL,paid+5); i++) show.push(i);
-    show.forEach(idx=>{
+    
+    let currentRowElement = null;
+
+    for(let idx=0; idx<TOTAL; idx++) {
       const period=idx+1, isPaid=paidStatus[idx], isCurr=(period===paid);
       const bal = balances[period];
       const tr=document.createElement('tr');
-      if(isCurr) tr.className='current-row';
+      
+      if(isCurr) {
+        tr.className='current-row';
+        currentRowElement = tr; // ล็อคเป้าหมายงวดปัจจุบันไว้เลื่อนจอ
+      }
+      
       const badge = isCurr ? `<span class="badge current">งวดล่าสุด</span>` : isPaid ? `<span class="badge paid">✅ จ่ายแล้ว</span>` : `<span class="badge upcoming">รออยู่</span>`;
       tr.innerHTML=`<td>${period}</td><td>${dates[idx]||'—'}</td><td>${fmt(payments[idx])}</td><td>${fmt(bal)}</td><td>${badge}</td>`;
       tbody.appendChild(tr);
-    });
+    }
+
+    // สั่งให้ตารางเลื่อนตำแหน่งอัตโนมัติ (Auto Scroll) ไปหางวดล่าสุด
+    if (currentRowElement) {
+      setTimeout(() => {
+        const wrapper = document.getElementById('tableWrapper');
+        wrapper.scrollTop = currentRowElement.offsetTop - (wrapper.clientHeight / 2);
+      }, 300);
+    }
 
   } catch(e) {
     document.getElementById('loadingState').innerHTML = `<div style="color:#FF8A4D;font-size:14px">⚠️ ดึงข้อมูลไม่ได้</div><div style="margin-top:8px;font-size:12px;color:var(--text-low)">${e.message}</div>`;
