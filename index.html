@@ -1,243 +1,20 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<title>Ford Everest Sport — Loan Intelligence</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap');
-  :root {
-    --bg-deep:#05070C; --glass:rgba(255,255,255,.04); --glass-border:rgba(255,255,255,.08);
-    --cyan:#4DE8FF; --violet:#A78BFA; --orange:#FF8A4D; --green:#4DFFB0;
-    --text-hi:#F2F4F8; --text-mid:#8A93A6; --text-low:#4B5263;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg-deep);color:var(--text-hi);font-family:'Sarabun',sans-serif;min-height:100vh;padding:32px 16px 70px;overflow-x:hidden}
-  .mesh-bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55}
-  .blob{position:absolute;border-radius:50%;filter:blur(80px)}
-  .blob-1{width:480px;height:480px;background:radial-gradient(circle,rgba(77,232,255,.18),transparent 70%);top:-120px;left:-100px;animation:float1 18s ease-in-out infinite}
-  .blob-2{width:520px;height:520px;background:radial-gradient(circle,rgba(167,139,250,.16),transparent 70%);bottom:-160px;right:-120px;animation:float2 22s ease-in-out infinite}
-  .blob-3{width:380px;height:380px;background:radial-gradient(circle,rgba(255,138,77,.12),transparent 70%);top:40%;left:50%;animation:float3 26s ease-in-out infinite}
-  @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,40px)}}
-  @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,-30px)}}
-  @keyframes float3{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
-  .wrap{max-width:1020px;margin:0 auto;position:relative;z-index:2}
-  .fade-in{opacity:0;transform:translateY(16px);animation:fadeUp .7s cubic-bezier(.16,1,.3,1) forwards}
-  @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
-  .glass{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:relative}
-  .glass::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.06),transparent 40%);pointer-events:none}
-  .header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:28px}
-  .eyebrow{font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--cyan);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-  .pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pulse 2s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  .title{font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,5vw,42px);font-weight:700;letter-spacing:-.02em;background:linear-gradient(135deg,#fff,#b8c2d4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .subtitle{color:var(--text-mid);font-size:14px;margin-top:8px;font-weight:300}
-  .price-pill{padding:10px 18px;border-radius:14px}
-  .price-pill .label{font-size:11px;color:var(--text-low);text-transform:uppercase;letter-spacing:.08em}
-  .price-pill .value{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600}
-  .loading-state{text-align:center;padding:60px 20px;font-size:15px;color:var(--text-mid)}
-  .spinner{width:36px;height:36px;border:3px solid var(--glass-border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .hero-row{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
-  @media(max-width:760px){.hero-row{grid-template-columns:1fr}}
-  .hero-progress{padding:28px;display:flex;flex-direction:column;justify-content:center}
-  .progress-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
-  .progress-top .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
-  .progress-top .pct{font-family:'Space Grotesk',sans-serif;font-size:44px;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
-  .ring-track{position:relative;width:100%;height:14px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
-  .ring-fill{position:absolute;top:0;left:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:10px;box-shadow:0 0 20px rgba(77,232,255,.5);transition:width 1.6s cubic-bezier(.16,1,.3,1)}
-  .ring-marks{display:flex;justify-content:space-between;margin-top:8px}
-  .ring-marks span{font-size:10.5px;color:var(--text-low);font-family:'Space Grotesk',sans-serif}
-  .hero-stats{display:flex;flex-direction:column;gap:12px}
-  .stat-glass{padding:16px 18px;display:flex;align-items:center;flex:1}
-  .stat-glass .left{display:flex;align-items:center;gap:12px}
-  .stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .stat-icon svg{width:18px;height:18px}
-  .stat-text .lbl{font-size:11.5px;color:var(--text-mid)}
-  .stat-text .num{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;margin-top:2px}
-  .chart-glass{padding:26px 24px 18px;margin-bottom:16px}
-  .chart-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:6px}
-  .chart-head .h{font-family:'Space Grotesk',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
-  .chart-now{text-align:right}
-  .chart-now .v{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;color:var(--orange);line-height:1}
-  .chart-now .l{font-size:11px;color:var(--text-low);text-transform:uppercase}
-  .chart-svg-wrap{width:100%;overflow:visible;margin-top:10px;position:relative}
-  #hoverTooltip{position:absolute;pointer-events:none;background:rgba(15,18,26,.95);border:1px solid var(--glass-border);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--text-hi);transform:translate(-50%,-120%);opacity:0;transition:opacity .15s;white-space:nowrap;font-family:'Space Grotesk',sans-serif;z-index:5}
-  #hoverTooltip .tt-period{color:var(--text-mid);font-size:10.5px}
-  #hoverTooltip .tt-val{font-weight:600}
-  .legend-row{display:flex;gap:22px;flex-wrap:wrap;margin-top:6px;padding-top:16px;border-top:1px solid var(--glass-border)}
-  .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-mid)}
-  .legend-line{width:18px;height:3px;border-radius:2px}
-  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-  @media(max-width:720px){.grid{grid-template-columns:1fr 1fr}}
-  .card{padding:18px 16px;transition:transform .25s,border-color .25s}
-  .card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.18)}
-  .card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-low);margin-bottom:8px}
-  .card .v{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:600;line-height:1.1}
-  .card .sub{font-size:11.5px;color:var(--text-mid);margin-top:4px}
-  .timeline-glass{padding:22px 26px 30px;margin-bottom:16px}
-  .timeline-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
-  .timeline-head .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
-  .timeline-head .v{font-size:12px;color:var(--text-low)}
-  .milestone-track{position:relative;height:4px;background:rgba(255,255,255,.07);border-radius:4px;margin:50px 6px 36px}
-  .milestone-fill{position:absolute;top:0;left:0;bottom:0;border-radius:4px;background:linear-gradient(90deg,var(--violet),var(--cyan));width:0%;transition:width 1.8s cubic-bezier(.16,1,.3,1);box-shadow:0 0 16px rgba(77,232,255,.45)}
-  .milestone-pt{position:absolute;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#1c2230;border:2px solid var(--text-low)}
-  .milestone-pt.done{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 10px rgba(77,232,255,.6)}
-  .milestone-pt.now{width:18px;height:18px;background:var(--orange);border-color:var(--orange);animation:nowPulse 2s ease-in-out infinite}
-  @keyframes nowPulse{0%,100%{box-shadow:0 0 0 6px rgba(255,138,77,.18),0 0 14px rgba(255,138,77,.6)}50%{box-shadow:0 0 0 10px rgba(255,138,77,.08),0 0 20px rgba(255,138,77,.8)}}
-  .milestone-label{position:absolute;top:-34px;transform:translateX(-50%);font-size:10px;color:var(--text-low);white-space:nowrap;text-align:center;font-family:'Space Grotesk',sans-serif}
-  .milestone-label .pct{color:var(--text-mid);font-weight:600;display:block;font-size:12px;margin-bottom:1px}
-  .milestone-label.below{top:22px}
-  .table-glass{padding:22px 20px}
-  .table-head{margin-bottom:14px}
-  .table-head .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
-  .table-wrap{overflow-x:auto}
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  thead th{font-family:'Space Grotesk',sans-serif;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-low);padding:8px 10px;border-bottom:1px solid var(--glass-border);text-align:right}
-  thead th:first-child{text-align:left}
-  tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
-  tbody tr:hover{background:rgba(255,255,255,.03)}
-  tbody td{padding:7px 10px;text-align:right;font-family:'Space Grotesk',sans-serif;color:var(--text-mid)}
-  tbody td:first-child{text-align:left}
-  tbody tr.current-row td{color:var(--text-hi)}
-  .badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:600}
-  .badge.paid{background:rgba(77,255,176,.12);color:var(--green)}
-  .badge.current{background:rgba(255,138,77,.14);color:var(--orange)}
-  .badge.upcoming{background:rgba(255,255,255,.06);color:var(--text-low)}
-  .update-info{text-align:center;font-size:11.5px;color:var(--text-low);margin-top:22px}
-  .update-info span{color:var(--cyan)}
-</style>
-</head>
-<body>
-<div class="mesh-bg">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-</div>
-<div class="wrap">
-  <div class="header fade-in">
-    <div>
-      <div class="eyebrow"><span class="pulse-dot"></span>Loan Intelligence · Live</div>
-      <div class="title">Ford Everest Sport</div>
-      <div class="subtitle">อัปเดตข้อมูลตรงจาก Google Sheets แบบ Real-time</div>
-    </div>
-    <div class="price-pill glass">
-      <div class="label">ราคารถ</div>
-      <div class="value" id="priceVal">กำลังโหลด...</div>
-    </div>
-  </div>
-
-  <div id="loadingState" class="loading-state glass fade-in">
-    <div class="spinner"></div>
-    กำลังดึงข้อมูลจาก Google Sheets...
-  </div>
-
-  <div id="mainContent" style="display:none">
-    <div class="hero-row">
-      <div class="hero-progress glass fade-in" style="animation-delay:.05s">
-        <div class="progress-top">
-          <div class="h">ความก้าวหน้าการผ่อน</div>
-          <div class="pct" id="heroPct">0%</div>
-        </div>
-        <div class="ring-track"><div class="ring-fill" id="ringFill"></div></div>
-        <div class="ring-marks"><span>งวด 0</span><span>15</span><span>30</span><span>45</span><span>60</span></div>
-      </div>
-      <div class="hero-stats">
-        <div class="stat-glass glass fade-in" style="animation-delay:.1s">
-          <div class="left">
-            <div class="stat-icon" style="background:rgba(77,255,176,.12)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#4DFFB0" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
-            </div>
-            <div class="stat-text">
-              <div class="lbl">จ่ายแล้วสะสม</div>
-              <div class="num" id="paidNum" style="color:var(--green)">฿0</div>
-            </div>
-          </div>
-        </div>
-        <div class="stat-glass glass fade-in" style="animation-delay:.15s">
-          <div class="left">
-            <div class="stat-icon" style="background:rgba(255,138,77,.12)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#FF8A4D" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-            </div>
-            <div class="stat-text">
-              <div class="lbl">คงเหลือต้องจ่าย</div>
-              <div class="num" id="remainNum" style="color:var(--orange)">฿0</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="chart-glass glass fade-in" style="animation-delay:.2s">
-      <div class="chart-head">
-        <div class="h">ยอดคงเหลือลดลงตามเวลา</div>
-        <div class="chart-now">
-          <div class="v" id="remainNow">฿0</div>
-          <div class="l" id="remainNowLabel">คงเหลือ ณ งวดปัจจุบัน</div>
-        </div>
-      </div>
-      <div class="chart-svg-wrap">
-        <svg id="trendChart" viewBox="0 0 900 320" width="100%" style="display:block"></svg>
-        <div id="hoverTooltip"></div>
-      </div>
-      <div class="legend-row">
-        <div class="legend-item"><div class="legend-line" style="background:var(--green)"></div>จ่ายแล้ว</div>
-        <div class="legend-item"><div class="legend-line" style="background:var(--orange);opacity:.7"></div>คาดการณ์</div>
-        <div class="legend-item">เลื่อนเมาส์บนกราฟเพื่อดูรายละเอียด</div>
-      </div>
-    </div>
-
-    <div class="grid">
-      <div class="card glass fade-in" style="animation-delay:.25s">
-        <div class="k">งวดปัจจุบัน</div>
-        <div class="v" id="cardPeriod">—</div>
-        <div class="sub" id="cardDate">—</div>
-      </div>
-      <div class="card glass fade-in" style="animation-delay:.3s">
-        <div class="k">ค่าผ่อน/เดือน</div>
-        <div class="v" id="cardPayment" style="color:var(--cyan)">—</div>
-        <div class="sub" id="cardPaymentSub">—</div>
-      </div>
-      <div class="card glass fade-in" style="animation-delay:.35s">
-        <div class="k">% ที่จ่ายแล้ว</div>
-        <div class="v" id="cardPct" style="color:var(--green)">—</div>
-        <div class="sub">ของราคารถทั้งหมด</div>
-      </div>
-      <div class="card glass fade-in" style="animation-delay:.4s">
-        <div class="k">เหลืออีก</div>
-        <div class="v" id="cardRemain" style="color:var(--violet)">—</div>
-        <div class="sub" id="cardDue">—</div>
-      </div>
-    </div>
-
-    <div class="timeline-glass glass fade-in" style="animation-delay:.45s">
-      <div class="timeline-head">
-        <div class="h">เส้นทางสู่การปลดหนี้</div>
-        <div class="v" id="timelineStart">—</div>
-      </div>
-      <div class="milestone-track" id="milestoneTrack">
-        <div class="milestone-fill" id="milestoneFill"></div>
-      </div>
-    </div>
-
-    <div class="table-glass glass fade-in" style="animation-delay:.5s">
-      <div class="table-head"><div class="h">ประวัติการจ่ายรายงวด</div></div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>งวดที่</th><th>วันที่</th><th>ยอดชำระ</th><th>ยอดคงเหลือ</th><th>สถานะ</th></tr></thead>
-          <tbody id="paymentTable"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <div class="update-info">อัปเดตจาก Google Sheets · <span id="lastUpdate">—</span></div>
-</div>
-
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbzGRE7SmAQ_TFz-IPpWNnj6At8swAu6BA91Vs8tA-sxTzZIh-5p2s2o0xvlYqg-efVk/exec';
 const TOTAL = 60;
 
 const fmt = n => '฿' + Math.round(n).toLocaleString('en-US');
+
+// ฟังก์ชันแปลงวันที่ ISO ให้เป็นสไตล์ไทยอ่านง่าย
+function formatDate(dateStr) {
+  if (!dateStr || dateStr === '—') return '—';
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr; // ถ้าไม่ใช่ Date คืนค่าเดิม
+    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+  } catch(e) {
+    return dateStr;
+  }
+}
 
 function animCount(el, target, ms, pre='฿') {
   if (!el) return;
@@ -250,7 +27,6 @@ function animCount(el, target, ms, pre='฿') {
   requestAnimationFrame(tick);
 }
 
-// ฟังก์ชันสร้าง Mock Data เผื่อไว้กรณีเรียกผ่าน API จริงไม่ได้เนื่องจากติดปัญหาเรื่อง Cross-Origin/Network
 function generateMockData() {
   const mock = [];
   mock[0] = ["Ford Everest Sport Summary Sheet"];
@@ -263,18 +39,15 @@ function generateMockData() {
   mock[7] = ["AmtDue", 566520];
   mock[8] = ["Dates"];
 
-  // สมมติงวดปัจจุบันจ่ายไปแล้ว 20 งวดจาก 60
   const currentPaidCount = 20; 
-  
   let baseDate = new Date(2025, 0, 15);
   for (let i = 1; i <= TOTAL; i++) {
     mock[2][i] = i === 60 ? 14123 : 14163;
     mock[3][i] = i;
     mock[4][i] = i <= currentPaidCount ? "✅ PAID" : "UPCOMING";
-    
     let d = new Date(baseDate);
     d.setMonth(d.getMonth() + (i - 1));
-    mock[8][i] = d.toLocaleDateString('th-TH', {year:'numeric', month:'short', day:'numeric'});
+    mock[8][i] = d.toISOString();
   }
   return mock;
 }
@@ -287,7 +60,7 @@ async function load() {
       if(!res.ok) throw new Error("Network response not ok");
       rows = await res.json();
     } catch (apiErr) {
-      console.warn("ไม่สามารถดึงข้อมูลจาก API ได้, ระบบกำลังใช้งานข้อมูลจำลองแทน:", apiErr.message);
+      console.warn("API Error, switching to mock data:", apiErr.message);
       rows = generateMockData();
     }
 
@@ -313,7 +86,10 @@ async function load() {
     for(let i=1; i<=TOTAL; i++) payments.push(parseFloat(r[2]?.[i]) || stdPayment);
 
     const dates = [];
-    for(let i=1; i<=TOTAL; i++) dates.push(r[8]?.[i] || '');
+    for(let i=1; i<=TOTAL; i++) {
+      // ผ่านการจัดฟอร์แมตก่อนนำไปบันทึกในอาเรย์
+      dates.push(formatDate(r[8]?.[i]));
+    }
 
     const balances = [price];
     for(let i=1; i<=TOTAL; i++) balances.push(Math.max(price - payments.slice(0,i).reduce((a,b)=>a+b,0), 0));
@@ -364,7 +140,6 @@ async function load() {
 
     const track = document.getElementById('milestoneTrack');
     if(track) {
-      // เคลียร์ Milestone เดิมออกก่อนกรณีอัปเดตรีเฟรชรอบใหม่
       const oldPts = track.querySelectorAll('.milestone-pt, .milestone-label');
       oldPts.forEach(o => o.remove());
 
@@ -380,11 +155,11 @@ async function load() {
       const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-50px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">ปัจจุบัน</span>งวด ${paid}`; track.appendChild(nl);
     }
 
-    buildChart(balances, paid, TOTAL, price, dates, paidStatus, payments);
+    buildChart(balances, paid, total, price, dates, paidStatus, payments);
 
     const tbody = document.getElementById('paymentTable');
     if(tbody) {
-      tbody.innerHTML = ''; // ล้างตารางเดิม
+      tbody.innerHTML = ''; 
       const show = [];
       for(let i=Math.max(0,paid-5); i<paid; i++) show.push(i);
       for(let i=paid; i<Math.min(TOTAL,paid+5); i++) show.push(i);
@@ -445,7 +220,6 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
         s+=`<text x="${x}" y="${y-18}" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="12" fill="#F2F4F8">วันนี้</text>`; 
       }
     }
-    // หลีกเลี่ยงค่าดัชนีติดลบสำหรับงวดที่ 0
     const dl= i===0 ? 'เริ่มต้น' : (dates[i-1] || 'คาดการณ์');
     s+=`<circle class="ht" data-i="${i}" data-bal="${balances[i]}" data-date="${dl}" data-paid="${isPaid}" cx="${x}" cy="${y}" r="10" fill="transparent" style="cursor:pointer"/>`;
   }
@@ -467,7 +241,5 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
 }
 
 load();
-setInterval(load, 5*60*1000); // ทำงานรีเฟรชข้อมูลทุก ๆ 5 นาที
+setInterval(load, 5*60*1000); 
 </script>
-</body>
-</html>
