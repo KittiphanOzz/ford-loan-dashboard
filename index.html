@@ -4,7 +4,7 @@ const TOTAL = 60;
 
 const fmt = n => '฿' + Math.round(n).toLocaleString('en-US');
 
-// ฟังก์ชันแปลงวันที่ ISO ให้เป็นสไตล์อังกฤษ (เช่น 24 Mar 2026)
+// Converts ISO Date string (e.g., 2026-03-24T17:00:00.000Z) to "24 Mar 2026"
 function formatDate(dateStr) {
   if (!dateStr || dateStr === '—') return '—';
   try {
@@ -118,16 +118,16 @@ async function load() {
 
     document.getElementById('priceVal').textContent = fmt(price);
     document.getElementById('remainNow').textContent = fmt(balances[paid]);
-    document.getElementById('remainNowLabel').textContent = `คงเหลือ ณ งวดที่ ${paid}`;
+    document.getElementById('remainNowLabel').textContent = `Remaining Balance at Period ${paid}`;
     document.getElementById('lastUpdate').textContent = new Date().toLocaleString('en-US');
     document.getElementById('cardPeriod').textContent = `${paid} / ${TOTAL}`;
     document.getElementById('cardDate').textContent = lastDate;
     document.getElementById('cardPayment').textContent = fmt(stdPayment);
-    document.getElementById('cardPaymentSub').textContent = `งวดสุดท้าย ${fmt(lastPay)}`;
+    document.getElementById('cardPaymentSub').textContent = `Final Period: ${fmt(lastPay)}`;
     document.getElementById('cardPct').textContent = pct.toFixed(1) + '%';
-    document.getElementById('cardRemain').textContent = `${remPeriods} งวด`;
-    document.getElementById('cardDue').textContent = `ครบกำหนดประมาณ ~${remPeriods} เดือน`;
-    if(firstDate) document.getElementById('timelineStart').textContent = `เริ่ม ${firstDate}`;
+    document.getElementById('cardRemain').textContent = `${remPeriods} Periods`;
+    document.getElementById('cardDue').textContent = `Matures in approx. ~${remPeriods} months`;
+    if(firstDate) document.getElementById('timelineStart').textContent = `Started: ${firstDate}`;
 
     animCount(document.getElementById('paidNum'), amtPaid, 1400);
     animCount(document.getElementById('remainNum'), amtDue, 1400);
@@ -158,19 +158,19 @@ async function load() {
       const oldPts = track.querySelectorAll('.milestone-pt, .milestone-label');
       oldPts.forEach(o => o.remove());
 
-      [{pct:0,label:'Start',sub:`งวด 1`,below:true},
-       {pct:25,label:'25%',sub:`งวด ${Math.round(TOTAL*.25)}`,below:false},
-       {pct:50,label:'50%',sub:`งวด ${Math.round(TOTAL*.5)}`,below:true},
-       {pct:75,label:'75%',sub:`งวด ${Math.round(TOTAL*.75)}`,below:false},
-       {pct:100,label:'Finish',sub:`งวด ${TOTAL}`,below:true}].forEach(m=>{
+      [{pct:0,label:'Start',sub:`Pd. 1`,below:true},
+       {pct:25,label:'25%',sub:`Pd. ${Math.round(TOTAL*.25)}`,below:false},
+       {pct:50,label:'50%',sub:`Pd. ${Math.round(TOTAL*.5)}`,below:true},
+       {pct:75,label:'75%',sub:`Pd. ${Math.round(TOTAL*.75)}`,below:false},
+       {pct:100,label:'Cleared',sub:`Pd. ${TOTAL}`,below:true}].forEach(m=>{
         const pt=document.createElement('div'); pt.className='milestone-pt'+(m.pct<=pct?' done':''); pt.style.left=m.pct+'%'; track.appendChild(pt);
         const lb=document.createElement('div'); lb.className='milestone-label'+(m.below?' below':''); lb.style.left=m.pct+'%'; lb.innerHTML=`<span class="pct">${m.label}</span>${m.sub}`; track.appendChild(lb);
       });
       const np=document.createElement('div'); np.className='milestone-pt now'; np.style.left=pct+'%'; track.appendChild(np);
-      const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-50px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">ปัจจุบัน</span>งวด ${paid}`; track.appendChild(nl);
+      const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-50px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">Current</span>Pd. ${paid}`; track.appendChild(nl);
     }
 
-    buildChart(balances, paid, total, price, dates, paidStatus, payments);
+    buildChart(balances, paid, TOTAL, price, dates, paidStatus, payments);
 
     const tbody = document.getElementById('paymentTable');
     if(tbody) {
@@ -184,14 +184,18 @@ async function load() {
         const bal = balances[period];
         const tr=document.createElement('tr');
         if(isCurr) tr.className='current-row';
-        const badge = isCurr ? `<span class="badge current">งวดล่าสุด</span>` : isPaid ? `<span class="badge paid">✅ จ่ายแล้ว</span>` : `<span class="badge upcoming">รออยู่</span>`;
+        
+        // English Status Badges
+        const badge = isCurr ? `<span class="badge current">Latest</span>` : isPaid ? `<span class="badge paid">✅ Paid</span>` : `<span class="badge upcoming">Upcoming</span>`;
+        
+        // Executing clean dates inside the UI table cells
         tr.innerHTML=`<td>${period}</td><td>${dates[idx]||'—'}</td><td>${fmt(payments[idx])}</td><td>${fmt(bal)}</td><td>${badge}</td>`;
         tbody.appendChild(tr);
       });
     }
 
   } catch(e) {
-    document.getElementById('loadingState').innerHTML = `<div style="color:#FF8A4D;font-size:14px">⚠️ ดึงข้อมูลไม่ได้</div><div style="margin-top:8px;font-size:12px;color:var(--text-low)">${e.message}</div>`;
+    document.getElementById('loadingState').innerHTML = `<div style="color:#FF8A4D;font-size:14px">⚠️ Data Fetch Failed</div><div style="margin-top:8px;font-size:12px;color:var(--text-low)">${e.message}</div>`;
   }
 }
 
