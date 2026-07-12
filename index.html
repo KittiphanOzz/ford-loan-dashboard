@@ -4,13 +4,29 @@ const TOTAL = 60;
 
 const fmt = n => '฿' + Math.round(n).toLocaleString('en-US');
 
-// ฟังก์ชันแปลงวันที่ ISO ให้เป็นสไตล์ไทยอ่านง่าย
+// ฟังก์ชันแปลงวันที่ ISO ให้เป็นสไตล์อังกฤษ (เช่น 24 Mar 2026)
 function formatDate(dateStr) {
   if (!dateStr || dateStr === '—') return '—';
   try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr; // ถ้าไม่ใช่ Date คืนค่าเดิม
-    return d.toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' });
+    let s = dateStr.toString().trim();
+    if (s.includes('T')) {
+      s = s.split('T')[0]; 
+    }
+    const parts = s.split('-');
+    if (parts.length === 3) {
+      const year = parseInt(parts[0]);
+      const month = parseInt(parts[1]) - 1;
+      const day = parseInt(parts[2]);
+      const d = new Date(year, month, day);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+      }
+    }
+    const d2 = new Date(s);
+    if (!isNaN(d2.getTime())) {
+      return d2.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+    }
+    return s;
   } catch(e) {
     return dateStr;
   }
@@ -87,7 +103,6 @@ async function load() {
 
     const dates = [];
     for(let i=1; i<=TOTAL; i++) {
-      // ผ่านการจัดฟอร์แมตก่อนนำไปบันทึกในอาเรย์
       dates.push(formatDate(r[8]?.[i]));
     }
 
@@ -104,7 +119,7 @@ async function load() {
     document.getElementById('priceVal').textContent = fmt(price);
     document.getElementById('remainNow').textContent = fmt(balances[paid]);
     document.getElementById('remainNowLabel').textContent = `คงเหลือ ณ งวดที่ ${paid}`;
-    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('th-TH');
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('en-US');
     document.getElementById('cardPeriod').textContent = `${paid} / ${TOTAL}`;
     document.getElementById('cardDate').textContent = lastDate;
     document.getElementById('cardPayment').textContent = fmt(stdPayment);
@@ -143,11 +158,11 @@ async function load() {
       const oldPts = track.querySelectorAll('.milestone-pt, .milestone-label');
       oldPts.forEach(o => o.remove());
 
-      [{pct:0,label:'เริ่มต้น',sub:`งวด 1`,below:true},
+      [{pct:0,label:'Start',sub:`งวด 1`,below:true},
        {pct:25,label:'25%',sub:`งวด ${Math.round(TOTAL*.25)}`,below:false},
        {pct:50,label:'50%',sub:`งวด ${Math.round(TOTAL*.5)}`,below:true},
        {pct:75,label:'75%',sub:`งวด ${Math.round(TOTAL*.75)}`,below:false},
-       {pct:100,label:'ปลดหนี้',sub:`งวด ${TOTAL}`,below:true}].forEach(m=>{
+       {pct:100,label:'Finish',sub:`งวด ${TOTAL}`,below:true}].forEach(m=>{
         const pt=document.createElement('div'); pt.className='milestone-pt'+(m.pct<=pct?' done':''); pt.style.left=m.pct+'%'; track.appendChild(pt);
         const lb=document.createElement('div'); lb.className='milestone-label'+(m.below?' below':''); lb.style.left=m.pct+'%'; lb.innerHTML=`<span class="pct">${m.label}</span>${m.sub}`; track.appendChild(lb);
       });
@@ -197,7 +212,7 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
   for(let i=0; i<=total; i+=10){
     const x=xF(i);
     s+=`<line x1="${x}" y1="${pT}" x2="${x}" y2="${H-pB}" stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;
-    s+=`<text x="${x}" y="${H-pB+18}" text-anchor="middle" font-family="Space Grotesk" font-size="11" fill="#4B5263">${i===0?'เริ่ม':i}</text>`;
+    s+=`<text x="${x}" y="${H-pB+18}" text-anchor="middle" font-family="Space Grotesk" font-size="11" fill="#4B5263">${i===0?'Start':i}</text>`;
   }
   let full=`M ${xF(0)} ${yF(balances[0])}`;
   for(let i=1;i<=total;i++) full+=` L ${xF(i)} ${yF(balances[i])}`;
@@ -217,10 +232,10 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
       s+=`<circle cx="${x}" cy="${y}" r="${isCurr?6:4}" fill="${col}" stroke="#0A0E16" stroke-width="2"/>`;
       if(isCurr){ 
         s+=`<circle cx="${x}" cy="${y}" r="11" fill="none" stroke="#FF8A4D" stroke-width="1.5" opacity=".5"/>`; 
-        s+=`<text x="${x}" y="${y-18}" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="12" fill="#F2F4F8">วันนี้</text>`; 
+        s+=`<text x="${x}" y="${y-18}" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="12" fill="#F2F4F8">Now</text>`; 
       }
     }
-    const dl= i===0 ? 'เริ่มต้น' : (dates[i-1] || 'คาดการณ์');
+    const dl= i===0 ? 'Start' : (dates[i-1] || 'Projection');
     s+=`<circle class="ht" data-i="${i}" data-bal="${balances[i]}" data-date="${dl}" data-paid="${isPaid}" cx="${x}" cy="${y}" r="10" fill="transparent" style="cursor:pointer"/>`;
   }
   svg.innerHTML=s;
@@ -232,7 +247,7 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
         const i=t.getAttribute('data-i'), bal=parseFloat(t.getAttribute('data-bal')), date=t.getAttribute('data-date'), isPaid=t.getAttribute('data-paid')==='true';
         const sr=svg.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
         const sx=sr.width/W, sy=sr.height/H, cx=parseFloat(t.getAttribute('cx')), cy=parseFloat(t.getAttribute('cy'));
-        tip.innerHTML=`<div class="tt-period">งวด ${i} · ${date}</div><div class="tt-val">${fmt(bal)}</div><div class="tt-period">${isPaid?'จ่ายแล้ว':'คาดการณ์'}</div>`;
+        tip.innerHTML=`<div class="tt-period">Period ${i} · ${date}</div><div class="tt-val">${fmt(bal)}</div><div class="tt-period">${isPaid?'Paid':'Estimated'}</div>`;
         tip.style.left=(sr.left-wr.left+cx*sx)+'px'; tip.style.top=(sr.top-wr.top+cy*sy)+'px'; tip.style.opacity='1';
       });
       t.addEventListener('mouseleave',()=>{ tip.style.opacity='0'; });
