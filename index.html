@@ -33,7 +33,7 @@
   .subtitle{color:var(--text-mid);font-size:14px;margin-top:8px;font-weight:300}
   
   .right-actions{display:flex;align-items:center;gap:12px;}
-  .price-pill{padding:10px 18px;border-radius:14px}
+  .price-pill padding:10px 18px;border-radius:14px}
   .price-pill .label{font-size:11px;color:var(--text-low);text-transform:uppercase;letter-spacing:.08em}
   .price-pill .value{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600}
   
@@ -150,6 +150,7 @@
   .form-input:disabled{color:var(--text-low);background:rgba(0,0,0,.2);cursor:not-allowed}
   .btn-submit{width:100%;padding:14px;border-radius:12px;background:linear-gradient(90deg, var(--orange), #ff6a1a);border:none;color:#05070C;font-weight:700;font-size:15px;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(255,138,77,.3);margin-top:16px;display:flex;justify-content:center;align-items:center;gap:8px}
   .btn-submit:hover{box-shadow:0 0 24px rgba(255,138,77,.5);transform:translateY(-2px)}
+  .btn-submit:disabled{cursor:not-allowed;opacity:0.9;}
   .btn-close{position:absolute;top:28px;right:24px;background:none;border:none;color:var(--text-low);cursor:pointer;padding:4px}
   .btn-close:hover{color:var(--text-hi)}
 </style>
@@ -536,94 +537,157 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
 
   let projP=`M ${xF(paid)} ${yF(balances[paid])}`;
   for(let i=paid+1;i<=total;i++) projP+=` L ${xF(i)} ${yF(balances[i])}`;
-  s+=`<path d="${projP}" fill="none" stroke="#FF8A4D" stroke-width="2" stroke-dasharray="6,6" opacity="0.7"/>`;
-  
-  for(let i=0;i<=total;i++) {
-     const cx = xF(i), cy = yF(balances[i]);
-     const color = i <= paid ? '#4DFFB0' : '#FF8A4D';
-     s+=`<circle cx="${cx}" cy="${cy}" r="4" fill="${color}" stroke="#05070C" stroke-width="2" style="cursor:pointer"
-         onmouseenter="showTooltip(event, ${i}, ${balances[i]}, '${dates[i-1]||'-'}')" onmouseleave="hideTooltip()" />`;
+  s+=`<path d="${projP}" fill="none" stroke="#FF8A4D" stroke-opacity=".5" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"/>`;
+
+  for(let i=0;i<=total;i++){
+    const cx=xF(i), cy=yF(balances[i]);
+    let r=3, f='#1C2230', str='rgba(255,255,255,.2)', sw=1;
+    if(i===paid) { r=6; f='#FF8A4D'; str='#fff'; sw=2; }
+    else if(i<paid) { r=4; f='#4DE8FF'; str='none'; }
+    s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${f}" stroke="${str}" stroke-width="${sw}" class="pt-trigger" data-i="${i}" style="cursor:pointer"/>`;
   }
-  
   svg.innerHTML = s;
+
+  const tt=document.getElementById('hoverTooltip');
+  svg.querySelectorAll('.pt-trigger').forEach(c=>{
+    c.addEventListener('mouseenter', e=>{
+      const i=parseInt(e.target.getAttribute('data-i'));
+      const bal=balances[i];
+      let hHtml = '';
+      if(i===0){
+        hHtml = `<div class="tt-period">Start</div><div class="tt-val">Value: ${fmt(bal)}</div>`;
+      } else {
+        const pDate = dates[i-1] || '—';
+        const pStatus = paidStatus[i-1];
+        const statusText = pStatus ? '<span style="color:var(--green)">Paid</span>' : '<span style="color:var(--text-low)">Pending</span>';
+        hHtml = `<div class="tt-period">Period ${i} (${statusText})</div><div class="tt-val">Balance: ${fmt(bal)}</div><div style="font-size:11px;color:var(--text-low);margin-top:2px">Date: ${pDate}</div>`;
+      }
+      tt.innerHTML = hHtml;
+      tt.style.opacity=1;
+    });
+    c.addEventListener('mousemove', e=>{
+      const rect=svg.getBoundingClientRect();
+      const x=e.clientX - rect.left;
+      const y=e.clientY - rect.top;
+      tt.style.left=x+'px';
+      tt.style.top=y+'px';
+    });
+    c.addEventListener('mouseleave', ()=>tt.style.opacity=0);
+  });
 }
 
-function showTooltip(e, period, balance, dateStr) {
-  const tt = document.getElementById('hoverTooltip');
-  tt.innerHTML = `<div class="tt-period">Period ${period}</div><div class="tt-val">฿${balance.toLocaleString('en-US')}</div>`;
-  tt.style.left = e.pageX + 'px';
-  tt.style.top = e.pageY + 'px';
-  tt.style.opacity = 1;
-}
+// Drawer & Form Logic
+const btnOpen = document.getElementById('btnOpenDrawer');
+const btnClose = document.getElementById('btnCloseDrawer');
+const overlay = document.getElementById('drawerOverlay');
+const drawer = document.getElementById('inputDrawer');
+const form = document.getElementById('paymentForm');
 
-function hideTooltip() {
-  const tt = document.getElementById('hoverTooltip');
-  tt.style.opacity = 0;
-}
-
-// Drawer Overlay logic
-document.getElementById('btnOpenDrawer')?.addEventListener('click', () => {
+const openDrawer = () => {
   document.getElementById('formPeriod').value = globalNextPeriod;
   document.getElementById('formAmount').value = globalStdPayment;
-  document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
-  document.getElementById('formPassword').value = ''; // Reset password input
-  document.getElementById('drawerOverlay').classList.add('open');
-  document.getElementById('inputDrawer').classList.add('open');
-});
+  
+  // ใส่วันที่ปัจจุบันลงในช่อง Date
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  document.getElementById('formDate').value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById('formPassword').value = ''; // เคลียร์พาสเวิร์ดเก่า
 
-const closeDrawer = () => {
-  document.getElementById('drawerOverlay').classList.remove('open');
-  document.getElementById('inputDrawer').classList.remove('open');
+  overlay.classList.add('open');
+  drawer.classList.add('open');
 };
 
-document.getElementById('btnCloseDrawer')?.addEventListener('click', closeDrawer);
-document.getElementById('drawerOverlay')?.addEventListener('click', closeDrawer);
+const closeDrawer = () => {
+  overlay.classList.remove('open');
+  drawer.classList.remove('open');
+};
 
-// Form Submission handling with password validation
-document.getElementById('paymentForm')?.addEventListener('submit', async (e) => {
+btnOpen.addEventListener('click', openDrawer);
+btnClose.addEventListener('click', closeDrawer);
+overlay.addEventListener('click', closeDrawer);
+
+// จัดการการส่งฟอร์มโดยเปลี่ยนปุ่มเป็น Processing และ Success สีเขียว
+form.addEventListener('submit', async (e) => {
   e.preventDefault();
-  
-  const pwd = document.getElementById('formPassword').value;
-  // --- CHANGE PASSWORD HERE ---
-  if (pwd !== '1234') { 
-    alert('❌ Invalid Security Password! Access Denied.');
-    return;
-  }
   
   const amount = document.getElementById('formAmount').value;
   const date = document.getElementById('formDate').value;
+  const password = document.getElementById('formPassword').value;
   const btnSubmit = document.getElementById('btnSubmitForm');
-  
+  const originalText = btnSubmit.innerHTML;
+
+  // ตรวจสอบความปลอดภัยเบื้องต้น (Password ต้องไม่เป็นค่าว่าง)
+  if (!password.trim()) {
+    return;
+  }
+
+  // ปรับสถานะปุ่มขณะกำลังส่งข้อมูล
   btnSubmit.disabled = true;
-  btnSubmit.innerHTML = '<span>Processing...</span>';
-  
+  btnSubmit.innerHTML = `
+    <svg class="spinner" style="width:16px;height:16px;margin:0;border-width:2px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24"></svg>
+    <span>Processing...</span>
+  `;
+
   try {
+    const params = new URLSearchParams({
+      amount: amount,
+      date: date,
+      password: password
+    });
+
     const response = await fetch(API, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        action: 'logPayment',
-        amount: amount,
-        date: date
-      })
+      mode: 'no-cors', // หากไม่มีปัญหากับ CORS
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params
     });
+
+    // แสดงผลสถานะสำเร็จ (Success) สีเขียวบนปุ่ม ทิ้งไว้ 2 วินาที
+    btnSubmit.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+    btnSubmit.style.color = '#fff';
+    btnSubmit.innerHTML = `
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:inline-block;vertical-align:middle;margin-right:4px;">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      <span>Success!</span>
+    `;
+
+    setTimeout(async () => {
+      // คืนค่าปุ่มกลับมาสภาพเดิม
+      btnSubmit.disabled = false;
+      btnSubmit.style.background = '';
+      btnSubmit.style.color = '';
+      btnSubmit.innerHTML = originalText;
+      
+      closeDrawer();
+      
+      // อัปเดตข้อมูลบนหน้าเว็บใหม่โดยไม่ต้องกด Refresh
+      document.getElementById('loadingState').style.display = 'block';
+      document.getElementById('mainContent').style.display = 'none';
+      await load();
+    }, 2000);
+
+  } catch (error) {
+    console.error('Error submitting payment:', error);
+    btnSubmit.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+    btnSubmit.style.color = '#fff';
+    btnSubmit.innerHTML = `<span>❌ Error, Try Again</span>`;
     
-    alert(`Success! Period ${globalNextPeriod} submission received.`);
-    closeDrawer();
-    document.getElementById('mainContent').style.display = 'none';
-    document.getElementById('loadingState').style.display = 'block';
-    setTimeout(load, 1500); // Reload data after short delay
-  } catch (err) {
-    alert('Submission failed: ' + err.message);
-  } finally {
-    btnSubmit.disabled = false;
-    btnSubmit.innerHTML = '<span>Submit Update</span>';
+    setTimeout(() => {
+      btnSubmit.disabled = false;
+      btnSubmit.style.background = '';
+      btnSubmit.style.color = '';
+      btnSubmit.innerHTML = originalText;
+    }, 3000);
   }
 });
 
-// Init load
-load();
+// โหลดข้อมูลเริ่มต้นเมื่อเปิดเว็บ
+window.addEventListener('DOMContentLoaded', load);
 </script>
 </body>
 </html>
