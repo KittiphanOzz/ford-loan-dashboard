@@ -2,179 +2,870 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Ford Everest Sport — Loan Intelligence</title>
+<title>Ford Everest Sport — Loan Intelligence Pro</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Sarabun:wght@200;300;400;500;600;700&display=swap');
+  
   :root {
-    --bg-deep:#05070C; --glass:rgba(255,255,255,.04); --glass-border:rgba(255,255,255,.08);
-    --cyan:#4DE8FF; --violet:#A78BFA; --orange:#FF8A4D; --green:#4DFFB0;
-    --text-hi:#F2F4F8; --text-mid:#8A93A6; --text-low:#4B5263;
+    --bg-deep: #03060E;
+    --card-bg: rgba(10, 16, 30, 0.45);
+    --glass-border: rgba(255, 255, 255, 0.05);
+    --cyan: #00F0FF;
+    --cyan-glow: rgba(0, 240, 255, 0.3);
+    --violet: #8B5CF6;
+    --violet-glow: rgba(139, 92, 246, 0.25);
+    --orange: #FF6B00;
+    --orange-glow: rgba(255, 107, 0, 0.35);
+    --green: #10B981;
+    --green-glow: rgba(16, 185, 129, 0.3);
+    --text-hi: #F8FAFC;
+    --text-mid: #94A3B8;
+    --text-low: #475569;
   }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg-deep);color:var(--text-hi);font-family:'Sarabun',sans-serif;min-height:100vh;padding:32px 16px 70px;overflow-x:hidden}
-  .mesh-bg{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.55}
-  .blob{position:absolute;border-radius:50%;filter:blur(80px)}
-  .blob-1{width:480px;height:480px;background:radial-gradient(circle,rgba(77,232,255,.18),transparent 70%);top:-120px;left:-100px;animation:float1 18s ease-in-out infinite}
-  .blob-2{width:520px;height:520px;background:radial-gradient(circle,rgba(167,139,250,.16),transparent 70%);bottom:-160px;right:-120px;animation:float2 22s ease-in-out infinite}
-  .blob-3{width:380px;height:380px;background:radial-gradient(circle,rgba(255,138,77,.12),transparent 70%);top:40%;left:50%;animation:float3 26s ease-in-out infinite}
-  @keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(60px,40px)}}
-  @keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-50px,-30px)}}
-  @keyframes float3{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.15)}}
-  .wrap{max-width:1020px;margin:0 auto;position:relative;z-index:2}
-  .fade-in{opacity:0;transform:translateY(16px);animation:fadeUp .7s cubic-bezier(.16,1,.3,1) forwards}
-  @keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
-  .glass{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);position:relative}
-  .glass::before{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.06),transparent 40%);pointer-events:none}
-  .header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:28px}
-  .eyebrow{font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--cyan);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-  .pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:pulse 2s ease-in-out infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-  .title{font-family:'Space Grotesk',sans-serif;font-size:clamp(30px,5vw,42px);font-weight:700;letter-spacing:-.02em;background:linear-gradient(135deg,#fff,#b8c2d4);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
-  .subtitle{color:var(--text-mid);font-size:14px;margin-top:8px;font-weight:300}
-  
-  .right-actions{display:flex;align-items:center;gap:12px;}
-  .price-pill padding:10px 18px;border-radius:14px}
-  .price-pill .label{font-size:11px;color:var(--text-low);text-transform:uppercase;letter-spacing:.08em}
-  .price-pill .value{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600}
-  
-  .btn-trigger{padding:12px 20px;border-radius:14px;background:rgba(255,138,77,.1);border:1px solid rgba(255,138,77,.3);color:var(--orange);font-weight:600;font-size:13.5px;cursor:pointer;display:flex;align-items:center;gap:8px;transition:all .3s cubic-bezier(.16,1,.3,1);box-shadow:0 4px 12px rgba(0,0,0,.2);}
-  .btn-trigger:hover{background:var(--orange);color:#05070C;border-color:var(--orange);box-shadow:0 0 20px rgba(255,138,77,.4);transform:translateY(-2px)}
 
-  .loading-state{text-align:center;padding:60px 20px;font-size:15px;color:var(--text-mid)}
-  .spinner{width:36px;height:36px;border:3px solid var(--glass-border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .hero-row{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-bottom:16px}
-  @media(max-width:760px){.hero-row{grid-template-columns:1fr}}
-  .hero-progress{padding:28px;display:flex;flex-direction:column;justify-content:center}
-  .progress-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px}
-  .progress-top .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
-  .progress-top .pct{font-family:'Space Grotesk',sans-serif;font-size:44px;font-weight:700;background:linear-gradient(135deg,var(--cyan),var(--violet));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   
-  .ring-track{position:relative;width:100%;height:14px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
-  .ring-fill{position:absolute;top:0;left:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--violet),var(--cyan));border-radius:10px;box-shadow:0 0 20px rgba(77,232,255,.4);transition:width 1.6s cubic-bezier(.16,1,.3,1);overflow:hidden;}
-  .ring-fill::after {content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.35),transparent);animation:laserRun 2.5s infinite linear;}
-  .ring-fill::before {content:'';position:absolute;right:0;top:0;width:8px;height:100%;background:#fff;box-shadow:0 0 12px 2px #fff, 0 0 20px 4px var(--cyan);}
-  @keyframes laserRun {0% {left:-100%} 100% {left:200%}}
+  body {
+    background: var(--bg-deep);
+    color: var(--text-hi);
+    font-family: 'Sarabun', sans-serif;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+    overflow-x: hidden;
+  }
 
-  .ring-marks{display:flex;justify-content:space-between;margin-top:8px}
-  .ring-marks span{font-size:10.5px;color:var(--text-low);font-family:'Space Grotesk',sans-serif}
-  .hero-stats{display:flex;flex-direction:column;gap:12px}
-  .stat-glass{padding:16px 18px;display:flex;align-items:center;flex:1}
-  .stat-glass .left{display:flex;align-items:center;gap:12px}
-  .stat-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-  .stat-icon svg{width:18px;height:18px}
-  .stat-text .lbl{font-size:11.5px;color:var(--text-mid)}
-  .stat-text .num{font-family:'Space Grotesk',sans-serif;font-size:19px;font-weight:600;margin-top:2px}
-  .chart-glass{padding:26px 24px 18px;margin-bottom:16px}
-  .chart-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:6px}
-  .chart-head .h{font-family:'Space Grotesk',sans-serif;font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
-  .chart-now{text-align:right}
-  .chart-now .v{font-family:'Space Grotesk',sans-serif;font-size:28px;font-weight:700;color:var(--orange);line-height:1}
-  .chart-now .l{font-size:11px;color:var(--text-low);text-transform:uppercase}
-  .chart-svg-wrap{width:100%;overflow:visible;margin-top:10px;position:relative}
-  
-  #hoverTooltip{position:absolute;pointer-events:none;background:rgba(15,18,26,.95);border:1px solid var(--glass-border);border-radius:10px;padding:8px 12px;font-size:12px;color:var(--text-hi);transform:translate(-50%,-120%);opacity:0;transition:opacity .15s;white-space:nowrap;font-family:'Space Grotesk',sans-serif;z-index:5}
-  #hoverTooltip .tt-period{color:var(--text-mid);font-size:10.5px}
-  #hoverTooltip .tt-val{font-weight:600}
-  .legend-row{display:flex;gap:22px;flex-wrap:wrap;margin-top:6px;padding-top:16px;border-top:1px solid var(--glass-border)}
-  .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-mid)}
-  .legend-line{width:18px;height:3px;border-radius:2px}
-  
-  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
-  @media(max-width:720px){.grid{grid-template-columns:1fr 1fr}}
-  .card{padding:18px 16px;transition:transform .25s, border-color .25s, box-shadow .25s;position:relative;overflow:hidden;}
-  .card.card-cyan:hover { border-color: rgba(77,232,255,.4); box-shadow: 0 0 20px rgba(77,232,255,.15); }
-  .card.card-green:hover { border-color: rgba(77,255,176,.4); box-shadow: 0 0 20px rgba(77,255,176,.15); }
-  .card.card-violet:hover { border-color: rgba(167,139,250,.4); box-shadow: 0 0 20px rgba(167,139,250,.15); }
-  .card.card-orange:hover { border-color: rgba(255,138,77,.4); box-shadow: 0 0 20px rgba(255,138,77,.15); }
-  .card .k{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-low);margin-bottom:8px}
-  .card .v{font-family:'Space Grotesk',sans-serif;font-size:21px;font-weight:600;line-height:1.1}
-  .card .sub{font-size:11.5px;color:var(--text-mid);margin-top:4px}
-  
-  .timeline-glass{padding:22px 26px 30px;margin-bottom:16px}
-  .timeline-glass { overflow-x: auto; }
-  .timeline-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
-  .timeline-head .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
-  .timeline-head .v{font-size:12px;color:var(--text-low)}
-  
-  .milestone-track{position:relative;height:4px;background:rgba(255,255,255,.07);border-radius:4px;margin:50px 6px 36px;min-width:600px;}
-  .milestone-fill{position:absolute;top:0;left:0;bottom:0;border-radius:4px;background:linear-gradient(90deg,var(--violet),var(--cyan));width:0%;transition:width 1.8s cubic-bezier(.16,1,.3,1);box-shadow:0 0 16px rgba(77,232,255,.45);overflow:hidden;}
-  .milestone-fill::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);animation:laserRun 3s infinite linear;}
-  .milestone-fill::before{content:'';position:absolute;right:0;top:0;width:6px;height:100%;background:#fff;box-shadow:0 0 8px #fff, 0 0 14px var(--cyan);}
-  .milestone-pt{position:absolute;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;border-radius:50%;background:#1c2230;border:2px solid var(--text-low)}
-  .milestone-pt.done{background:var(--cyan);border-color:var(--cyan);box-shadow:0 0 10px rgba(77,232,255,.6)}
-  .milestone-pt.now{width:18px;height:18px;background:var(--orange);border-color:var(--orange);animation:nowPulse 2s ease-in-out infinite}
-  @keyframes nowPulse{0%,100%{box-shadow:0 0 0 4px rgba(255,138,77,.15),0 0 10px rgba(255,138,77,.5);opacity:1;}50%{box-shadow:0 0 0 12px rgba(255,138,77,.05),0 0 22px rgba(255,138,77,.9);opacity:.85;}}
-  .milestone-label{position:absolute;top:-34px;transform:translateX(-50%);font-size:10px;color:var(--text-low);white-space:nowrap;text-align:center;font-family:'Space Grotesk',sans-serif}
-  .milestone-label .pct{color:var(--text-mid);font-weight:600;display:block;font-size:12px;margin-bottom:1px}
-  .milestone-label.below{top:22px}
-  
-  .table-glass{padding:22px 20px}
-  .table-head{margin-bottom:14px}
-  .table-head .h{font-family:'Space Grotesk',sans-serif;font-size:13px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-mid)}
-  .table-wrap{overflow-x:auto; overflow-y:auto; max-height:400px; position:relative;}
-  .table-wrap::-webkit-scrollbar {width:6px; height:6px;}
-  .table-wrap::-webkit-scrollbar-track {background:rgba(255,255,255,.01); border-radius:4px;}
-  .table-wrap::-webkit-scrollbar-thumb {background:rgba(255,255,255,.1); border-radius:4px;}
-  .table-wrap::-webkit-scrollbar-thumb:hover {background:rgba(255,255,255,.2);}
-  
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  thead th{font-family:'Space Grotesk',sans-serif;font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-low);padding:10px 10px;border-bottom:1px solid var(--glass-border);text-align:right; position:sticky; top:0; background:#0b0e17; z-index:2;}
-  thead th:first-child{text-align:left}
-  tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .15s}
-  tbody tr:hover{background:rgba(255,255,255,.03)}
-  tbody td{padding:10px 10px;text-align:right;font-family:'Space Grotesk',sans-serif;color:var(--text-mid)}
-  tbody td:first-child{text-align:left}
-  tbody tr.current-row {background:rgba(255,138,77,.06);}
-  tbody tr.current-row td{color:var(--text-hi); font-weight:600;}
-  .badge{display:inline-block;padding:2px 8px;border-radius:6px;font-size:10.5px;font-weight:600}
-  .badge.paid{background:rgba(77,255,176,.12);color:var(--green)}
-  .badge.current{background:rgba(255,138,77,.14);color:var(--orange)}
-  .badge.upcoming{background:rgba(255,255,255,.06);color:var(--text-low)}
-  .update-info{text-align:center;font-size:11.5px;color:var(--text-low);margin-top:22px}
-  .update-info span{color:var(--cyan)}
+  /* Futuristic background mesh */
+  .mesh-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: 
+      radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.04) 0%, transparent 45%),
+      radial-gradient(circle at 90% 80%, rgba(255, 107, 0, 0.04) 0%, transparent 45%),
+      radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.03) 0%, transparent 50%);
+  }
 
-  /* Glassmorphism Input Drawer */
-  .drawer-overlay{position:fixed;inset:0;background:rgba(2,4,8,.7);z-index:100;backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .4s ease}
-  .drawer-overlay.open{opacity:1;pointer-events:all}
-  .drawer{position:fixed;top:0;right:-420px;bottom:0;width:100%;max-width:400px;background:rgba(10,14,24,.92);border-left:1px solid var(--glass-border);z-index:101;box-shadow:-10px 0 40px rgba(0,0,0,.6);backdrop-filter:blur(30px);padding:32px 24px;display:flex;flex-direction:column;transition:right .4s cubic-bezier(.16,1,.3,1)}
-  .drawer.open{right:0}
-  .drawer::before{content:'';position:absolute;top:0;left:0;bottom:0;width:1px;background:linear-gradient(to bottom, transparent, var(--orange), var(--cyan), transparent);animation:laserRunVertical 3s infinite linear;}
-  @keyframes laserRunVertical { 0% { background-position: 0 0; } 100% { background-position: 0 400px; } }
-  .drawer-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;color:var(--text-hi);margin-bottom:6px;display:flex;align-items:center;gap:10px}
-  .drawer-sub{font-size:13px;color:var(--text-mid);margin-bottom:32px}
-  .form-group{margin-bottom:20px}
-  .form-group label{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-low);margin-bottom:8px;font-weight:600}
-  .form-input{width:100%;background:rgba(255,255,255,.03);border:1px solid var(--glass-border);border-radius:12px;padding:12px 16px;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:15px;transition:all .2s}
-  .form-input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 12px rgba(255,138,77,.2);background:rgba(255,255,255,.06)}
-  .form-input:disabled{color:var(--text-low);background:rgba(0,0,0,.2);cursor:not-allowed}
-  .btn-submit{width:100%;padding:14px;border-radius:12px;background:linear-gradient(90deg, var(--orange), #ff6a1a);border:none;color:#05070C;font-weight:700;font-size:15px;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(255,138,77,.3);margin-top:16px;display:flex;justify-content:center;align-items:center;gap:8px}
-  .btn-submit:hover{box-shadow:0 0 24px rgba(255,138,77,.5);transform:translateY(-2px)}
-  .btn-submit:disabled{cursor:not-allowed;opacity:0.9;}
-  .btn-close{position:absolute;top:28px;right:24px;background:none;border:none;color:var(--text-low);cursor:pointer;padding:4px}
-  .btn-close:hover{color:var(--text-hi)}
+  .wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Cyber Glass Style */
+  .glass {
+    background: var(--card-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    position: relative;
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.7);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), transparent 50%);
+    pointer-events: none;
+  }
+
+  /* Header Section */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .eyebrow {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-shadow: 0 0 10px var(--cyan-glow);
+  }
+
+  .pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 12px var(--cyan);
+    animation: pulse 2s infinite ease-in-out;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.4; }
+  }
+
+  .title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(32px, 5vw, 46px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #FFFFFF 30%, #64748B 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle {
+    color: var(--text-mid);
+    font-size: 14px;
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  .right-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .price-pill {
+    padding: 12px 24px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .price-pill .label {
+    font-size: 10px;
+    color: var(--text-low);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 2px;
+  }
+
+  .price-pill .value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-hi);
+  }
+
+  .btn-trigger {
+    padding: 14px 24px;
+    border-radius: 16px;
+    background: rgba(255, 107, 0, 0.1);
+    border: 1px solid rgba(255, 107, 0, 0.25);
+    color: var(--orange);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  .btn-trigger:hover {
+    background: var(--orange);
+    color: #000;
+    border-color: var(--orange);
+    box-shadow: 0 0 30px var(--orange-glow);
+    transform: translateY(-2px);
+  }
+
+  /* Loading State */
+  .loading-state {
+    text-align: center;
+    padding: 80px 40px;
+    font-size: 15px;
+    color: var(--text-mid);
+  }
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.05);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 0.8s cubic-bezier(0.5, 0.1, 0.1, 0.9) infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Hero row layout */
+  .hero-row {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 820px) {
+    .hero-row { grid-template-columns: 1fr; }
+  }
+
+  .hero-progress {
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+  }
+
+  .progress-top .h {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--text-mid);
+  }
+
+  .progress-top .pct {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 52px;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--cyan) 30%, var(--violet) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+  }
+
+  .ring-track {
+    position: relative;
+    width: 100%;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .ring-fill {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 0%;
+    background: linear-gradient(90deg, var(--violet), var(--cyan));
+    border-radius: 12px;
+    box-shadow: 0 0 20px var(--cyan-glow);
+    transition: width 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .ring-marks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+  }
+
+  .ring-marks span {
+    font-size: 11px;
+    color: var(--text-low);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  /* Stats card style */
+  .hero-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .stat-glass {
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    flex: 1;
+  }
+
+  .stat-glass:hover {
+    border-color: rgba(255,255,255,0.12);
+  }
+
+  .stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-right: 18px;
+  }
+
+  .stat-icon svg { width: 22px; height: 22px; }
+
+  .stat-text .lbl {
+    font-size: 11.5px;
+    color: var(--text-mid);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .stat-text .num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  /* Chart & Analytics */
+  .chart-glass {
+    padding: 32px;
+    margin-bottom: 20px;
+  }
+
+  .chart-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .chart-head .h {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-mid);
+  }
+
+  .chart-now { text-align: right; }
+  
+  .chart-now .v {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--orange);
+    line-height: 1;
+    text-shadow: 0 0 15px var(--orange-glow);
+  }
+
+  .chart-now .l {
+    font-size: 10px;
+    color: var(--text-low);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+  }
+
+  .chart-svg-wrap {
+    width: 100%;
+    overflow: visible;
+    margin-top: 15px;
+    position: relative;
+  }
+
+  #hoverTooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(5, 10, 20, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--text-hi);
+    transform: translate(-50%, -120%);
+    opacity: 0;
+    transition: opacity 0.2s, transform 0.15s;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+    z-index: 10;
+    backdrop-filter: blur(8px);
+  }
+
+  .legend-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--glass-border);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-mid);
+  }
+
+  .legend-line { width: 16px; height: 4px; border-radius: 2px; }
+
+  /* Info Grid cards */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 768px) {
+    .grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  @media (max-width: 480px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Neon Glowing active states for each card type */
+  .card-orange:hover {
+    border-color: var(--orange);
+    box-shadow: 0 0 25px var(--orange-glow);
+    transform: translateY(-4px);
+  }
+
+  .card-cyan:hover {
+    border-color: var(--cyan);
+    box-shadow: 0 0 25px var(--cyan-glow);
+    transform: translateY(-4px);
+  }
+
+  .card-green:hover {
+    border-color: var(--green);
+    box-shadow: 0 0 25px var(--green-glow);
+    transform: translateY(-4px);
+  }
+
+  .card-violet:hover {
+    border-color: var(--violet);
+    box-shadow: 0 0 25px var(--violet-glow);
+    transform: translateY(-4px);
+  }
+
+  .card .k {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-low);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .card .v {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .card .sub {
+    font-size: 11.5px;
+    color: var(--text-mid);
+    margin-top: 8px;
+    font-weight: 300;
+  }
+
+  /* Path to Debt Freedom */
+  .timeline-glass {
+    padding: 32px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+  }
+
+  .timeline-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .timeline-head .h {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-mid);
+  }
+
+  .timeline-head .v {
+    font-size: 12px;
+    color: var(--text-low);
+  }
+
+  .milestone-track {
+    position: relative;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    margin: 54px 12px 40px;
+    min-width: 650px;
+  }
+
+  .milestone-fill {
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--violet), var(--cyan));
+    width: 0%;
+    transition: width 2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 0 15px var(--cyan-glow);
+  }
+
+  .milestone-pt {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #0B101E;
+    border: 2px solid var(--text-low);
+    transition: all 0.4s;
+    z-index: 2;
+  }
+
+  .milestone-pt.done {
+    background: var(--cyan);
+    border-color: var(--cyan);
+    box-shadow: 0 0 12px var(--cyan);
+  }
+
+  .milestone-pt.now {
+    width: 20px;
+    height: 20px;
+    background: var(--orange);
+    border-color: #FFF;
+    animation: nowPulsePro 2.5s infinite ease-in-out;
+  }
+
+  @keyframes nowPulsePro {
+    0%, 100% { box-shadow: 0 0 0 0px rgba(255, 107, 0, 0.5), 0 0 10px var(--orange-glow); }
+    50% { box-shadow: 0 0 0 10px rgba(255, 107, 0, 0), 0 0 20px var(--orange-glow); }
+  }
+
+  .milestone-label {
+    position: absolute;
+    top: -38px;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: var(--text-low);
+    white-space: nowrap;
+    text-align: center;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .milestone-label .pct {
+    color: var(--text-mid);
+    font-weight: 700;
+    display: block;
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+
+  .milestone-label.below { top: 24px; }
+
+  /* Premium Table design */
+  .table-glass {
+    padding: 32px 24px;
+  }
+
+  .table-head { margin-bottom: 20px; }
+  
+  .table-head .h {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-mid);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    max-height: 440px;
+    position: relative;
+  }
+
+  /* Custom Modern Scrollbar */
+  .table-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+  .table-wrap::-webkit-scrollbar-track { background: transparent; }
+  .table-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+  .table-wrap::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
+
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 13.5px;
+  }
+
+  thead th {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-low);
+    padding: 14px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    text-align: right;
+    position: sticky;
+    top: 0;
+    background: #070B16;
+    z-index: 5;
+    font-weight: 600;
+  }
+
+  thead th:first-child { text-align: left; border-top-left-radius: 12px; }
+  thead th:last-child { border-top-right-radius: 12px; }
+
+  tbody tr {
+    transition: all 0.2s ease;
+  }
+
+  tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  tbody td {
+    padding: 14px 16px;
+    text-align: right;
+    font-family: 'Space Grotesk', sans-serif;
+    color: var(--text-mid);
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+  }
+
+  tbody td:first-child { text-align: left; }
+
+  /* Glow active row */
+  tbody tr.current-row {
+    background: rgba(255, 107, 0, 0.04);
+  }
+
+  tbody tr.current-row td {
+    color: var(--text-hi);
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255,107,0,0.15);
+  }
+
+  tbody tr.current-row td:first-child {
+    box-shadow: inset 4px 0 0 0 var(--orange);
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  .badge.paid {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--green);
+    border: 1px solid rgba(16, 185, 129, 0.15);
+  }
+
+  .badge.current {
+    background: rgba(255, 107, 0, 0.15);
+    color: var(--orange);
+    border: 1px solid rgba(255, 107, 0, 0.25);
+    box-shadow: 0 0 10px rgba(255,107,0,0.1);
+  }
+
+  .badge.upcoming {
+    background: rgba(255,255,255,0.03);
+    color: var(--text-low);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .update-info {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-low);
+    margin-top: 32px;
+  }
+
+  .update-info span { color: var(--cyan); font-weight: 500; }
+
+  /* Futuristic Drawer overlay */
+  .drawer-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 4, 8, 0.85);
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+  .drawer {
+    position: fixed;
+    top: 0; right: -460px; bottom: 0;
+    width: 100%;
+    max-width: 440px;
+    background: rgba(6, 10, 20, 0.96);
+    border-left: 1px solid rgba(255,255,255,0.08);
+    z-index: 101;
+    box-shadow: -20px 0 50px rgba(0,0,0,0.8);
+    backdrop-filter: blur(40px);
+    padding: 40px 32px;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .drawer.open { right: 0; }
+
+  .drawer::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent, var(--orange), var(--cyan), transparent);
+  }
+
+  .drawer-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-hi);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .drawer-sub {
+    font-size: 13px;
+    color: var(--text-mid);
+    margin-bottom: 40px;
+    line-height: 1.5;
+  }
+
+  .form-group { margin-bottom: 24px; }
+  
+  .form-group label {
+    display: block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-low);
+    margin-bottom: 10px;
+    font-weight: 700;
+  }
+
+  .form-input {
+    width: 100%;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px 18px;
+    color: #FFF;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    transition: all 0.3s;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: var(--orange);
+    box-shadow: 0 0 15px rgba(255,107,0,0.25);
+    background: rgba(255,255,255,0.05);
+  }
+
+  .form-input:disabled {
+    color: var(--text-low);
+    background: rgba(0,0,0,0.3);
+    cursor: not-allowed;
+    border-color: rgba(255,255,255,0.03);
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    background: linear-gradient(90deg, var(--orange), #FF8533);
+    border: none;
+    color: #03060E;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 20px var(--orange-glow);
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-submit:hover {
+    box-shadow: 0 0 30px var(--orange-glow);
+    transform: translateY(-2px);
+  }
+
+  .btn-submit:disabled { cursor: not-allowed; opacity: 0.9; }
+
+  .btn-close {
+    position: absolute;
+    top: 36px; right: 32px;
+    background: none;
+    border: none;
+    color: var(--text-low);
+    cursor: pointer;
+    padding: 6px;
+    transition: color 0.2s;
+  }
+
+  .btn-close:hover { color: var(--text-hi); }
 </style>
 </head>
 <body>
-<div class="mesh-bg">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-</div>
+<div class="mesh-bg"></div>
 <div class="wrap">
   <div class="header fade-in">
     <div>
-      <div class="eyebrow"><span class="pulse-dot"></span>Loan Live</div>
+      <div class="eyebrow"><span class="pulse-dot"></span>Loan Intelligence Console</div>
       <div class="title">Ford Everest Sport</div>
-      <div class="subtitle">Real-time Dashboard</div>
+      <div class="subtitle">Live financial trajectory and predictive forecasting status</div>
     </div>
     <div class="right-actions">
       <button class="btn-trigger" id="btnOpenDrawer" style="display:none;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         Log Next Period
       </button>
       <div class="price-pill glass">
-        <div class="label">Total Price</div>
+        <div class="label">Total Acquisition Price</div>
         <div class="value" id="priceVal">Loading...</div>
       </div>
     </div>
@@ -182,14 +873,14 @@
 
   <div id="loadingState" class="loading-state glass fade-in">
     <div class="spinner"></div>
-    Fetching data from Google Sheets...
+    Establishing secure connection to Google Sheets...
   </div>
 
   <div id="mainContent" style="display:none">
     <div class="hero-row">
       <div class="hero-progress glass fade-in" style="animation-delay:.05s">
         <div class="progress-top">
-          <div class="h">Payment Progress</div>
+          <div class="h">Payment Completion</div>
           <div class="pct" id="heroPct">0%</div>
         </div>
         <div class="ring-track"><div class="ring-fill" id="ringFill"></div></div>
@@ -197,24 +888,24 @@
       </div>
       <div class="hero-stats">
         <div class="stat-glass glass fade-in" style="animation-delay:.1s">
-          <div class="left">
-            <div class="stat-icon" style="background:rgba(77,255,176,.12)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#4DFFB0" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+          <div class="left" style="display:flex; align-items:center;">
+            <div class="stat-icon" style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="stat-text">
-              <div class="lbl">Total Paid</div>
-              <div class="num" id="paidNum" style="color:var(--green); text-shadow: 0 0 10px rgba(77,255,176,.2);">฿0</div>
+              <div class="lbl">Total Principle Paid</div>
+              <div class="num" id="paidNum" style="color:var(--green); text-shadow: 0 0 15px var(--green-glow);">฿0</div>
             </div>
           </div>
         </div>
         <div class="stat-glass glass fade-in" style="animation-delay:.15s">
-          <div class="left">
-            <div class="stat-icon" style="background:rgba(255,138,77,.12)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="#FF8A4D" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <div class="left" style="display:flex; align-items:center;">
+            <div class="stat-icon" style="background:rgba(255,107,0,0.1); border:1px solid rgba(255,107,0,0.2);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="2.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
             </div>
             <div class="stat-text">
-              <div class="lbl">Remaining Balance</div>
-              <div class="num" id="remainNum" style="color:var(--orange); text-shadow: 0 0 10px rgba(255,138,77,.2);">฿0</div>
+              <div class="lbl">Outstanding Debt Balance</div>
+              <div class="num" id="remainNum" style="color:var(--orange); text-shadow: 0 0 15px var(--orange-glow);">฿0</div>
             </div>
           </div>
         </div>
@@ -223,41 +914,41 @@
 
     <div class="chart-glass glass fade-in" style="animation-delay:.2s">
       <div class="chart-head">
-        <div class="h">Balance Trend Over Time</div>
+        <div class="h">Balance Amortization Trend</div>
         <div class="chart-now">
           <div class="v" id="remainNow">฿0</div>
-          <div class="l" id="remainNowLabel">Balance at Current Period</div>
+          <div class="l" id="remainNowLabel">Balance at current interval</div>
         </div>
       </div>
       <div class="chart-svg-wrap">
-        <svg id="trendChart" viewBox="0 0 900 320" width="100%" style="display:block"></svg>
+        <svg id="trendChart" viewBox="0 0 900 320" width="100%" style="display:block; overflow:visible;"></svg>
         <div id="hoverTooltip"></div>
       </div>
       <div class="legend-row">
-        <div class="legend-item"><div class="legend-line" style="background:var(--green)"></div>Paid (Current Flow)</div>
-        <div class="legend-item"><div class="legend-line" style="background:var(--orange);opacity:.7"></div>Projected</div>
-        <div class="legend-item">Hover over the chart for details</div>
+        <div class="legend-item"><div class="legend-line" style="background:var(--cyan)"></div>Paid (Actual Flow)</div>
+        <div class="legend-item"><div class="legend-line" style="background:var(--orange); opacity:0.6;"></div>Projected Pathway</div>
+        <div class="legend-item" style="color:var(--text-low)">• Hover coordinate points to inspect monthly details</div>
       </div>
     </div>
 
     <div class="grid">
       <div class="card glass card-orange fade-in" style="animation-delay:.25s">
-        <div class="k">Current Period</div>
-        <div class="v" id="cardPeriod">—</div>
+        <div class="k">Current Interval</div>
+        <div class="v" id="cardPeriod" style="color:var(--orange);">—</div>
         <div class="sub" id="cardDate">—</div>
       </div>
       <div class="card glass card-cyan fade-in" style="animation-delay:.3s">
-        <div class="k">Monthly Payment</div>
+        <div class="k">Regular Monthly</div>
         <div class="v" id="cardPayment" style="color:var(--cyan)">—</div>
         <div class="sub" id="cardPaymentSub">—</div>
       </div>
       <div class="card glass card-green fade-in" style="animation-delay:.35s">
-        <div class="k">% Paid</div>
+        <div class="k">Amortized Rate</div>
         <div class="v" id="cardPct" style="color:var(--green)">—</div>
-        <div class="sub">of total price</div>
+        <div class="sub">of cumulative original</div>
       </div>
       <div class="card glass card-violet fade-in" style="animation-delay:.4s">
-        <div class="k">Remaining</div>
+        <div class="k">Horizon Timeline</div>
         <div class="v" id="cardRemain" style="color:var(--violet)">—</div>
         <div class="sub" id="cardDue">—</div>
       </div>
@@ -265,7 +956,7 @@
 
     <div class="timeline-glass glass fade-in" style="animation-delay:.45s">
       <div class="timeline-head">
-        <div class="h">Path to Debt Freedom</div>
+        <div class="h">Amortization Milestone Tracker</div>
         <div class="v" id="timelineStart">—</div>
       </div>
       <div class="milestone-track" id="milestoneTrack">
@@ -274,50 +965,49 @@
     </div>
 
     <div class="table-glass glass fade-in" style="animation-delay:.5s">
-      <div class="table-head"><div class="h">Payment History (60 Periods)</div></div>
+      <div class="table-head"><div class="h">Full Schedule (60 Months)</div></div>
       <div class="table-wrap" id="tableWrapper">
         <table>
-          <thead><tr><th>Period</th><th>Date</th><th>Payment</th><th>Balance</th><th>Status</th></tr></thead>
+          <thead><tr><th>Period</th><th>Date Due</th><th>Payment Amount</th><th>Closing Balance</th><th>Status</th></tr></thead>
           <tbody id="paymentTable"></tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <div class="update-info">Updated from Google Sheets · <span id="lastUpdate">—</span></div>
+  <div class="update-info">Securely synchronized with Cloud Sheet Database · <span id="lastUpdate">—</span></div>
 </div>
 
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <div class="drawer" id="inputDrawer">
   <button class="btn-close" id="btnCloseDrawer">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
   </button>
   <div class="drawer-title">
-    <span style="width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 8px var(--orange)"></span>
-    Log Vehicle Payment
+    <span style="width:10px; height:10px; border-radius:50%; background:var(--orange); box-shadow:0 0 12px var(--orange)"></span>
+    Log Transaction
   </div>
-  <div class="drawer-sub">Authorized system access required to push updates to Google Sheets</div>
+  <div class="drawer-sub">Input verified statement payments. Successful transactions will instantly update client forecasts.</div>
   
   <form id="paymentForm">
     <div class="form-group">
-      <label>Logging Period</label>
+      <label>Target Payment Period</label>
       <input type="text" id="formPeriod" class="form-input" disabled />
     </div>
     <div class="form-group">
-      <label>Payment Amount (THB)</label>
+      <label>Amount (THB)</label>
       <input type="number" id="formAmount" class="form-input" required step="any" />
     </div>
     <div class="form-group">
-      <label>Payment Date</label>
+      <label>Execution Date</label>
       <input type="date" id="formDate" class="form-input" required />
     </div>
-    <!-- NEW PASSWORD FIELD -->
     <div class="form-group">
-      <label>Security Password</label>
-      <input type="password" id="formPassword" class="form-input" placeholder="••••" required />
+      <label>Console Encryption Passkey</label>
+      <input type="password" id="formPassword" class="form-input" placeholder="••••••••" required />
     </div>
     <button type="submit" class="btn-submit" id="btnSubmitForm">
-      <span>Submit Update</span>
+      <span>Submit to Cloud Database</span>
     </button>
   </form>
 </div>
@@ -441,20 +1131,20 @@ async function load() {
     
     const btnTrigger = document.getElementById('btnOpenDrawer');
     btnTrigger.style.display = 'flex';
-    btnTrigger.textContent = `+ Record Period ${globalNextPeriod}`;
+    btnTrigger.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-right:2px"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> Record Period ${globalNextPeriod}`;
 
     document.getElementById('priceVal').textContent = fmt(price);
     document.getElementById('remainNow').textContent = fmt(balances[paid]);
-    document.getElementById('remainNowLabel').textContent = `Balance at Period ${paid}`;
+    document.getElementById('remainNowLabel').textContent = `Outstanding Debt at Month ${paid}`;
     document.getElementById('lastUpdate').textContent = new Date().toLocaleString('en-GB');
     document.getElementById('cardPeriod').textContent = `${paid} / ${TOTAL}`;
-    document.getElementById('cardDate').textContent = lastDate;
+    document.getElementById('cardDate').textContent = `Latest update: ${lastDate}`;
     document.getElementById('cardPayment').textContent = fmt(stdPayment);
-    document.getElementById('cardPaymentSub').textContent = `Final Pmt ${fmt(lastPay)}`;
+    document.getElementById('cardPaymentSub').textContent = `Final Contract Pmt ${fmt(lastPay)}`;
     document.getElementById('cardPct').textContent = pct.toFixed(1) + '%';
-    document.getElementById('cardRemain').textContent = `${remPeriods} Periods`;
-    document.getElementById('cardDue').textContent = `Due in approx. ~${remPeriods} months`;
-    if(firstDate && firstDate !== '—') document.getElementById('timelineStart').textContent = `Started ${firstDate}`;
+    document.getElementById('cardRemain').textContent = `${remPeriods} Months`;
+    document.getElementById('cardDue').textContent = `Projected clearance in ~${remPeriods} m.`;
+    if(firstDate && firstDate !== '—') document.getElementById('timelineStart').textContent = `Contract start: ${firstDate}`;
 
     animCount(document.getElementById('paidNum'), amtPaid, 1400);
     animCount(document.getElementById('remainNum'), balances[paid], 1400);
@@ -479,7 +1169,7 @@ async function load() {
       const lb=document.createElement('div'); lb.className='milestone-label'+(m.below?' below':''); lb.style.left=m.pct+'%'; lb.innerHTML=`<span class="pct">${m.label}</span>${m.sub}`; track.appendChild(lb);
     });
     const np=document.createElement('div'); np.className='milestone-pt now'; np.style.left=pct+'%'; track.appendChild(np);
-    const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-50px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">Current</span>Period ${paid}`; track.appendChild(nl);
+    const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-55px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">Current</span>Period ${paid}`; track.appendChild(nl);
 
     buildChart(balances, paid, TOTAL, price, dates, paidStatus, payments);
 
@@ -492,7 +1182,7 @@ async function load() {
       const bal = balances[period];
       const tr=document.createElement('tr');
       if(isCurr) { tr.className='current-row'; currentRowElement = tr; }
-      const badge = isCurr ? `<span class="badge current">Latest</span>` : isPaid ? `<span class="badge paid">✅ Paid</span>` : `<span class="badge upcoming">Pending</span>`;
+      const badge = isCurr ? `<span class="badge current">Current</span>` : isPaid ? `<span class="badge paid">✅ Paid</span>` : `<span class="badge upcoming">Upcoming</span>`;
       tr.innerHTML=`<td>${period}</td><td>${dates[idx]||'—'}</td><td>${fmt(payments[idx])}</td><td>${fmt(bal)}</td><td>${badge}</td>`;
       tbody.appendChild(tr);
     }
@@ -505,7 +1195,7 @@ async function load() {
     }
 
   } catch(e) {
-    document.getElementById('loadingState').innerHTML = `<div style="color:#FF8A4D;font-size:14px">⚠️ Failed to load data</div><div style="margin-top:8px;font-size:12px;color:var(--text-low)">${e.message}</div>`;
+    document.getElementById('loadingState').innerHTML = `<div style="color:var(--orange);font-size:14px">⚠️ Critical Link Interrupted</div><div style="margin-top:8px;font-size:12px;color:var(--text-low)">${e.message}</div>`;
   }
 }
 
@@ -514,18 +1204,19 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
   const W=900,H=320,pL=64,pR=16,pT=20,pB=34,plotW=W-pL-pR,plotH=H-pT-pB;
   const xF=i=>pL+(i/total)*plotW, yF=b=>pT+(1-b/price)*plotH;
   let s=`<defs>
-    <linearGradient id="aG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4DE8FF" stop-opacity=".18"/><stop offset="100%" stop-color="#4DE8FF" stop-opacity="0"/></linearGradient>
-    <linearGradient id="lG" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4DFFB0"/><stop offset="100%" stop-color="#4DE8FF"/></linearGradient>
+    <linearGradient id="aG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00F0FF" stop-opacity=".15"/><stop offset="100%" stop-color="#00F0FF" stop-opacity="0"/></linearGradient>
+    <linearGradient id="lG" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8B5CF6"/><stop offset="100%" stop-color="#00F0FF"/></linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="4" result="blur" /><feComposite in="SourceGraphic" in2="blur" operator="over"/></filter>
   </defs>`;
   [0,200000,400000,600000,800000].forEach(v=>{
     const y=yF(v);
-    s+=`<line x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}" stroke="rgba(255,255,255,.06)" stroke-width="1"/>`;
-    s+=`<text x="${pL-10}" y="${y+4}" text-anchor="end" font-family="Space Grotesk" font-size="11" fill="#4B5263">${v/1000}k</text>`;
+    s+=`<line x1="${pL}" y1="${y}" x2="${W-pR}" y2="${y}" stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;
+    s+=`<text x="${pL-12}" y="${y+4}" text-anchor="end" font-family="Space Grotesk" font-weight="500" font-size="11" fill="#475569">${v/1000}k</text>`;
   });
   for(let i=0;i<=total;i+=10){
     const x=xF(i);
-    s+=`<line x1="${pT}" y1="${pT}" x2="${x}" y2="${H-pB}" stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;
-    s+=`<text x="${x}" y="${H-pB+18}" text-anchor="middle" font-family="Space Grotesk" font-size="11" fill="#4B5263">${i===0?'Start':i}</text>`;
+    s+=`<line x1="${x}" y1="${pT}" x2="${x}" y2="${H-pB}" stroke="rgba(255,255,255,.03)" stroke-width="1"/>`;
+    s+=`<text x="${x}" y="${H-pB+18}" text-anchor="middle" font-family="Space Grotesk" font-weight="500" font-size="11" fill="#475569">${i===0?'Start':i}</text>`;
   }
   let full=`M ${xF(0)} ${yF(balances[0])}`;
   for(let i=1;i<=total;i++) full+=` L ${xF(i)} ${yF(balances[i])}`;
@@ -533,17 +1224,17 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
   
   let paidP=`M ${xF(0)} ${yF(balances[0])}`;
   for(let i=1;i<=paid;i++) paidP+=` L ${xF(i)} ${yF(balances[i])}`;
-  s+=`<path d="${paidP}" fill="none" stroke="url(#lG)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+  s+=`<path d="${paidP}" fill="none" stroke="url(#lG)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>`;
 
   let projP=`M ${xF(paid)} ${yF(balances[paid])}`;
   for(let i=paid+1;i<=total;i++) projP+=` L ${xF(i)} ${yF(balances[i])}`;
-  s+=`<path d="${projP}" fill="none" stroke="#FF8A4D" stroke-opacity=".5" stroke-width="2" stroke-dasharray="4 4" stroke-linecap="round"/>`;
+  s+=`<path d="${projP}" fill="none" stroke="#FF6B00" stroke-opacity=".5" stroke-width="2" stroke-dasharray="6 4" stroke-linecap="round"/>`;
 
   for(let i=0;i<=total;i++){
     const cx=xF(i), cy=yF(balances[i]);
-    let r=3, f='#1C2230', str='rgba(255,255,255,.2)', sw=1;
-    if(i===paid) { r=6; f='#FF8A4D'; str='#fff'; sw=2; }
-    else if(i<paid) { r=4; f='#4DE8FF'; str='none'; }
+    let r=3, f='#0C101F', str='rgba(255,255,255,.25)', sw=1;
+    if(i===paid) { r=7; f='#FF6B00'; str='#FFF'; sw=2.5; }
+    else if(i<paid) { r=4.5; f='#00F0FF'; str='none'; }
     s+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${f}" stroke="${str}" stroke-width="${sw}" class="pt-trigger" data-i="${i}" style="cursor:pointer"/>`;
   }
   svg.innerHTML = s;
@@ -555,12 +1246,12 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
       const bal=balances[i];
       let hHtml = '';
       if(i===0){
-        hHtml = `<div class="tt-period">Start</div><div class="tt-val">Value: ${fmt(bal)}</div>`;
+        hHtml = `<div class="tt-period" style="font-weight:700; color:var(--cyan);">Initial Launch</div><div class="tt-val" style="margin-top:2px;">Value: ${fmt(bal)}</div>`;
       } else {
         const pDate = dates[i-1] || '—';
         const pStatus = paidStatus[i-1];
-        const statusText = pStatus ? '<span style="color:var(--green)">Paid</span>' : '<span style="color:var(--text-low)">Pending</span>';
-        hHtml = `<div class="tt-period">Period ${i} (${statusText})</div><div class="tt-val">Balance: ${fmt(bal)}</div><div style="font-size:11px;color:var(--text-low);margin-top:2px">Date: ${pDate}</div>`;
+        const statusText = pStatus ? '<span style="color:var(--green); font-weight:700;">✅ Paid</span>' : '<span style="color:var(--text-low)">Pending</span>';
+        hHtml = `<div class="tt-period" style="font-weight:700; color:var(--cyan);">Interval ${i} (${statusText})</div><div class="tt-val" style="margin-top:2px;">Outstanding: ${fmt(bal)}</div><div style="font-size:11px;color:var(--text-mid);margin-top:4px">Assigned Date: ${pDate}</div>`;
       }
       tt.innerHTML = hHtml;
       tt.style.opacity=1;
@@ -584,16 +1275,15 @@ const drawer = document.getElementById('inputDrawer');
 const form = document.getElementById('paymentForm');
 
 const openDrawer = () => {
-  document.getElementById('formPeriod').value = globalNextPeriod;
+  document.getElementById('formPeriod').value = `Month ${globalNextPeriod} / ${TOTAL}`;
   document.getElementById('formAmount').value = globalStdPayment;
   
-  // ใส่วันที่ปัจจุบันลงในช่อง Date
   const today = new Date();
   const yyyy = today.getFullYear();
   const mm = String(today.getMonth() + 1).padStart(2, '0');
   const dd = String(today.getDate()).padStart(2, '0');
   document.getElementById('formDate').value = `${yyyy}-${mm}-${dd}`;
-  document.getElementById('formPassword').value = ''; // เคลียร์พาสเวิร์ดเก่า
+  document.getElementById('formPassword').value = '';
 
   overlay.classList.add('open');
   drawer.classList.add('open');
@@ -608,7 +1298,6 @@ btnOpen.addEventListener('click', openDrawer);
 btnClose.addEventListener('click', closeDrawer);
 overlay.addEventListener('click', closeDrawer);
 
-// จัดการการส่งฟอร์มโดยเปลี่ยนปุ่มเป็น Processing และ Success สีเขียว
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   
@@ -618,54 +1307,41 @@ form.addEventListener('submit', async (e) => {
   const btnSubmit = document.getElementById('btnSubmitForm');
   const originalText = btnSubmit.innerHTML;
 
-  // ตรวจสอบความปลอดภัยเบื้องต้น (Password ต้องไม่เป็นค่าว่าง)
-  if (!password.trim()) {
-    return;
-  }
+  if (!password.trim()) return;
 
-  // ปรับสถานะปุ่มขณะกำลังส่งข้อมูล
   btnSubmit.disabled = true;
   btnSubmit.innerHTML = `
-    <svg class="spinner" style="width:16px;height:16px;margin:0;border-width:2px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24"></svg>
-    <span>Processing...</span>
+    <svg class="spinner" style="width:16px;height:16px;margin:0 8px 0 0;border-width:2.5px;display:inline-block;vertical-align:middle;" viewBox="0 0 24 24"></svg>
+    <span>Writing to Cloud Database...</span>
   `;
 
   try {
-    const params = new URLSearchParams({
-      amount: amount,
-      date: date,
-      password: password
-    });
-
-    const response = await fetch(API, {
+    const params = new URLSearchParams({ amount: amount, date: date, password: password });
+    await fetch(API, {
       method: 'POST',
-      mode: 'no-cors', // หากไม่มีปัญหากับ CORS
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: params
     });
 
-    // แสดงผลสถานะสำเร็จ (Success) สีเขียวบนปุ่ม ทิ้งไว้ 2 วินาที
-    btnSubmit.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+    btnSubmit.style.background = 'linear-gradient(90deg, #10B981, #059669)';
+    btnSubmit.style.boxShadow = '0 0 25px var(--green-glow)';
     btnSubmit.style.color = '#fff';
     btnSubmit.innerHTML = `
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="display:inline-block;vertical-align:middle;margin-right:4px;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" style="display:inline-block;vertical-align:middle;margin-right:4px;">
         <polyline points="20 6 9 17 4 12"></polyline>
       </svg>
-      <span>Success!</span>
+      <span>Transaction Secured!</span>
     `;
 
     setTimeout(async () => {
-      // คืนค่าปุ่มกลับมาสภาพเดิม
       btnSubmit.disabled = false;
       btnSubmit.style.background = '';
+      btnSubmit.style.boxShadow = '';
       btnSubmit.style.color = '';
       btnSubmit.innerHTML = originalText;
-      
       closeDrawer();
       
-      // อัปเดตข้อมูลบนหน้าเว็บใหม่โดยไม่ต้องกด Refresh
       document.getElementById('loadingState').style.display = 'block';
       document.getElementById('mainContent').style.display = 'none';
       await load();
@@ -673,9 +1349,9 @@ form.addEventListener('submit', async (e) => {
 
   } catch (error) {
     console.error('Error submitting payment:', error);
-    btnSubmit.style.background = 'linear-gradient(90deg, #ef4444, #dc2626)';
+    btnSubmit.style.background = 'linear-gradient(90deg, #EF4444, #DC2626)';
     btnSubmit.style.color = '#fff';
-    btnSubmit.innerHTML = `<span>❌ Error, Try Again</span>`;
+    btnSubmit.innerHTML = `<span>❌ Encryption Error</span>`;
     
     setTimeout(() => {
       btnSubmit.disabled = false;
@@ -686,7 +1362,6 @@ form.addEventListener('submit', async (e) => {
   }
 });
 
-// โหลดข้อมูลเริ่มต้นเมื่อเปิดเว็บ
 window.addEventListener('DOMContentLoaded', load);
 </script>
 </body>
