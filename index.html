@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Ford Everest Sport — Loan Intelligence</title>
@@ -136,7 +136,7 @@
   .update-info{text-align:center;font-size:11.5px;color:var(--text-low);margin-top:22px}
   .update-info span{color:var(--cyan)}
 
-  /* 🌌 หน้าต่างคีย์ข้อมูลสไลด์ (Glassmorphism Input Drawer) */
+  /* Glassmorphism Input Drawer */
   .drawer-overlay{position:fixed;inset:0;background:rgba(2,4,8,.7);z-index:100;backdrop-filter:blur(8px);opacity:0;pointer-events:none;transition:opacity .4s ease}
   .drawer-overlay.open{opacity:1;pointer-events:all}
   .drawer{position:fixed;top:0;right:-420px;bottom:0;width:100%;max-width:400px;background:rgba(10,14,24,.92);border-left:1px solid var(--glass-border);z-index:101;box-shadow:-10px 0 40px rgba(0,0,0,.6);backdrop-filter:blur(30px);padding:32px 24px;display:flex;flex-direction:column;transition:right .4s cubic-bezier(.16,1,.3,1)}
@@ -172,29 +172,29 @@
     <div class="right-actions">
       <button class="btn-trigger" id="btnOpenDrawer" style="display:none;">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-        บันทึกงวดถัดไป
+        Log Next Period
       </button>
       <div class="price-pill glass">
-        <div class="label">ราคารถ</div>
-        <div class="value" id="priceVal">กำลังโหลด...</div>
+        <div class="label">Total Price</div>
+        <div class="value" id="priceVal">Loading...</div>
       </div>
     </div>
   </div>
 
   <div id="loadingState" class="loading-state glass fade-in">
     <div class="spinner"></div>
-    กำลังดึงข้อมูลจาก Google Sheets...
+    Fetching data from Google Sheets...
   </div>
 
   <div id="mainContent" style="display:none">
     <div class="hero-row">
       <div class="hero-progress glass fade-in" style="animation-delay:.05s">
         <div class="progress-top">
-          <div class="h">ความก้าวหน้าการผ่อน</div>
+          <div class="h">Payment Progress</div>
           <div class="pct" id="heroPct">0%</div>
         </div>
         <div class="ring-track"><div class="ring-fill" id="ringFill"></div></div>
-        <div class="ring-marks"><span>งวด 0</span><span>15</span><span>30</span><span>45</span><span>60</span></div>
+        <div class="ring-marks"><span>Period 0</span><span>15</span><span>30</span><span>45</span><span>60</span></div>
       </div>
       <div class="hero-stats">
         <div class="stat-glass glass fade-in" style="animation-delay:.1s">
@@ -203,7 +203,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="#4DFFB0" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
             </div>
             <div class="stat-text">
-              <div class="lbl">จ่ายแล้วสะสม</div>
+              <div class="lbl">Total Paid</div>
               <div class="num" id="paidNum" style="color:var(--green); text-shadow: 0 0 10px rgba(77,255,176,.2);">฿0</div>
             </div>
           </div>
@@ -214,7 +214,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="#FF8A4D" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
             </div>
             <div class="stat-text">
-              <div class="lbl">คงเหลือต้องจ่าย</div>
+              <div class="lbl">Remaining Balance</div>
               <div class="num" id="remainNum" style="color:var(--orange); text-shadow: 0 0 10px rgba(255,138,77,.2);">฿0</div>
             </div>
           </div>
@@ -224,10 +224,10 @@
 
     <div class="chart-glass glass fade-in" style="animation-delay:.2s">
       <div class="chart-head">
-        <div class="h">ยอดคงเหลือลดลงตามเวลา</div>
+        <div class="h">Balance Trend Over Time</div>
         <div class="chart-now">
           <div class="v" id="remainNow">฿0</div>
-          <div class="l" id="remainNowLabel">คงเหลือ ณ งวดปัจจุบัน</div>
+          <div class="l" id="remainNowLabel">Balance at Current Period</div>
         </div>
       </div>
       <div class="chart-svg-wrap">
@@ -235,30 +235,30 @@
         <div id="hoverTooltip"></div>
       </div>
       <div class="legend-row">
-        <div class="legend-item"><div class="legend-line" style="background:var(--green)"></div>จ่ายแล้ว (กระแสวิ่ง)</div>
-        <div class="legend-item"><div class="legend-line" style="background:var(--orange);opacity:.7"></div>คาดการณ์</div>
-        <div class="legend-item">เลื่อนเมาส์บนกราฟเพื่อดูรายละเอียด</div>
+        <div class="legend-item"><div class="legend-line" style="background:var(--green)"></div>Paid (Current Flow)</div>
+        <div class="legend-item"><div class="legend-line" style="background:var(--orange);opacity:.7"></div>Projected</div>
+        <div class="legend-item">Hover over the chart for details</div>
       </div>
     </div>
 
     <div class="grid">
       <div class="card glass card-orange fade-in" style="animation-delay:.25s">
-        <div class="k">งวดปัจจุบัน</div>
+        <div class="k">Current Period</div>
         <div class="v" id="cardPeriod">—</div>
         <div class="sub" id="cardDate">—</div>
       </div>
       <div class="card glass card-cyan fade-in" style="animation-delay:.3s">
-        <div class="k">ค่าผ่อน/เดือน</div>
+        <div class="k">Monthly Payment</div>
         <div class="v" id="cardPayment" style="color:var(--cyan)">—</div>
         <div class="sub" id="cardPaymentSub">—</div>
       </div>
       <div class="card glass card-green fade-in" style="animation-delay:.35s">
-        <div class="k">% ที่จ่ายแล้ว</div>
+        <div class="k">% Paid</div>
         <div class="v" id="cardPct" style="color:var(--green)">—</div>
-        <div class="sub">ของราคารถทั้งหมด</div>
+        <div class="sub">of total price</div>
       </div>
       <div class="card glass card-violet fade-in" style="animation-delay:.4s">
-        <div class="k">เหลืออีก</div>
+        <div class="k">Remaining</div>
         <div class="v" id="cardRemain" style="color:var(--violet)">—</div>
         <div class="sub" id="cardDue">—</div>
       </div>
@@ -266,7 +266,7 @@
 
     <div class="timeline-glass glass fade-in" style="animation-delay:.45s">
       <div class="timeline-head">
-        <div class="h">เส้นทางสู่การปลดหนี้</div>
+        <div class="h">Path to Debt Freedom</div>
         <div class="v" id="timelineStart">—</div>
       </div>
       <div class="milestone-track" id="milestoneTrack">
@@ -275,20 +275,19 @@
     </div>
 
     <div class="table-glass glass fade-in" style="animation-delay:.5s">
-      <div class="table-head"><div class="h">ประวัติการจ่ายรายงวด (60 งวด)</div></div>
+      <div class="table-head"><div class="h">Payment History (60 Periods)</div></div>
       <div class="table-wrap" id="tableWrapper">
         <table>
-          <thead><tr><th>งวดที่</th><th>วันที่</th><th>ยอดชำระ</th><th>ยอดคงเหลือ</th><th>สถานะ</th></tr></thead>
+          <thead><tr><th>Period</th><th>Date</th><th>Payment</th><th>Balance</th><th>Status</th></tr></thead>
           <tbody id="paymentTable"></tbody>
         </table>
       </div>
     </div>
   </div>
 
-  <div class="update-info">อัปเดตจาก Google Sheets · <span id="lastUpdate">—</span></div>
+  <div class="update-info">Updated from Google Sheets · <span id="lastUpdate">—</span></div>
 </div>
 
-<!-- ระบบบานสไลด์กรอกข้อมูล (Drawer UI) -->
 <div class="drawer-overlay" id="drawerOverlay"></div>
 <div class="drawer" id="inputDrawer">
   <button class="btn-close" id="btnCloseDrawer">
@@ -296,31 +295,30 @@
   </button>
   <div class="drawer-title">
     <span style="width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 8px var(--orange)"></span>
-    บันทึกค่างวดรถ
+    Log Vehicle Payment
   </div>
-  <div class="drawer-sub">ระบบอัปเดตสถานะและตัดยอดในคอลัมน์ถัดไปอัตโนมัติ</div>
+  <div class="drawer-sub">System automatically updates status and deducts from the next column</div>
   
   <form id="paymentForm">
     <div class="form-group">
-      <label>งวดที่ลงข้อมูล</label>
+      <label>Logging Period</label>
       <input type="text" id="formPeriod" class="form-input" disabled />
     </div>
     <div class="form-group">
-      <label>ยอดเงินที่ชำระ (บาท)</label>
+      <label>Payment Amount (THB)</label>
       <input type="number" id="formAmount" class="form-input" required step="any" />
     </div>
     <div class="form-group">
-      <label>วันที่โอนชำระ</label>
+      <label>Payment Date</label>
       <input type="date" id="formDate" class="form-input" required />
     </div>
     <button type="submit" class="btn-submit" id="btnSubmitForm">
-      <span>ส่งข้อมูลอัปเดต</span>
+      <span>Submit Update</span>
     </button>
   </form>
 </div>
 
 <script>
-///const API = 'https://script.google.com/macros/s/AKfycbzGRE7SmAQ_TFz-IPpWNnj6At8swAu6BA91Vs8tA-sxTzZIh-5p2s2o0xvlYqg-efVk/exec';
 const API = 'https://script.google.com/macros/s/AKfycbwTo6OZGXnFp3oYow7LsUQoN28etL1OS-OR9162zfsFHlsZIuzmb22GFBIxJTF4eI0z/exec';
 const TOTAL = 60;
 
@@ -334,11 +332,8 @@ function formatDate(dateStr) {
   
   try {
     let s = dateStr.toString().trim();
-    
-    // 1. ถ้ามีตัว T หรือข้อมูลเวลาติดมา ให้ตัดเอาเฉพาะวันที่
     if (s.includes('T')) s = s.split('T')[0];
 
-    // 2. จัดการฟอร์แมต วัน/เดือน/ปี (เช่น 25/06/2026)
     if (s.includes('/')) {
       const parts = s.split('/');
       if (parts[0].length <= 2) {
@@ -346,7 +341,6 @@ function formatDate(dateStr) {
       }
     }
 
-    // 3. จัดการฟอร์แมต ปี-เดือน-วัน (เช่น 2026-06-25)
     if (s.includes('-')) {
       const parts = s.split('-');
       if (parts[0].length === 4) {
@@ -354,11 +348,10 @@ function formatDate(dateStr) {
       }
     }
     
-    // 4. ระบบป้องกันการลดวันจาก Timezone (ถ้าหลุดมาเป็น Date Object)
     const targetDate = new Date(s);
     if (!isNaN(targetDate.getTime())) {
       if (targetDate.getHours() === 0) {
-        targetDate.setHours(12, 0, 0, 0); // ดันเวลาไปเที่ยงวัน วันจะได้ไม่ถอยหลัง
+        targetDate.setHours(12, 0, 0, 0); 
       }
       return targetDate.toLocaleDateString('en-GB', { 
         day: 'numeric', 
@@ -374,7 +367,6 @@ function formatDate(dateStr) {
   }
 }
 
-// ฟังก์ชันแปลงเลขเดือนเป็นตัวย่อภาษาอังกฤษ (เช่น 02 -> Feb, 05 -> May)
 function convertToShortMonth(year, month, day) {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const mIdx = parseInt(month, 10) - 1;
@@ -404,9 +396,9 @@ async function load() {
 
     const price      = parseFloat(r[1]?.[1]) || 849780;       
     const stdPayment = parseFloat(r[2]?.[1]) || 14163;        
-    const lastPay    = parseFloat(r[2]?.[59]) || 14123;       
-    const amtPaid    = parseFloat(r[6]?.[1]) || 283260;       
-    const remPeriods = parseInt(r[5]?.[1])   || 40;           
+    const lastPay    = parseFloat(r[2]?.[59]) || 14123;        
+    const amtPaid    = parseFloat(r[6]?.[1]) || 283260;        
+    const remPeriods = parseInt(r[5]?.[1])   || 40;            
 
     globalStdPayment = stdPayment;
 
@@ -425,15 +417,14 @@ async function load() {
     for(let i=1; i<=TOTAL; i++) payments.push(parseFloat(r[2]?.[i]) || stdPayment);
     const dates = [];
     for(let i=1; i<=TOTAL; i++) {
-    let rawDate = r[8]?.[i];
-    if (rawDate && !isNaN(Date.parse(rawDate))) {
-    let dObj = new Date(rawDate);
-    // บังคับ Timezone เป็นกรุงเทพฯ ป้องกันวันที่ลดลง 1 วัน
-    dates.push(dObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' }));
-  } else {
-    dates.push(formatDate(rawDate));
-  }
-}
+      let rawDate = r[8]?.[i];
+      if (rawDate && !isNaN(Date.parse(rawDate))) {
+        let dObj = new Date(rawDate);
+        dates.push(dObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' }));
+      } else {
+        dates.push(formatDate(rawDate));
+      }
+    }
     const balances = [price];
     for(let i=1; i<=TOTAL; i++) balances.push(Math.max(price - payments.slice(0,i).reduce((a,b)=>a+b,0), 0));
 
@@ -446,20 +437,20 @@ async function load() {
     
     const btnTrigger = document.getElementById('btnOpenDrawer');
     btnTrigger.style.display = 'flex';
-    btnTrigger.textContent = `+ บันทึกงวดที่ ${globalNextPeriod}`;
+    btnTrigger.textContent = `+ Record Period ${globalNextPeriod}`;
 
     document.getElementById('priceVal').textContent = fmt(price);
     document.getElementById('remainNow').textContent = fmt(balances[paid]);
-    document.getElementById('remainNowLabel').textContent = `คงเหลือ ณ งวดที่ ${paid}`;
-    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('th-TH');
+    document.getElementById('remainNowLabel').textContent = `Balance at Period ${paid}`;
+    document.getElementById('lastUpdate').textContent = new Date().toLocaleString('en-GB');
     document.getElementById('cardPeriod').textContent = `${paid} / ${TOTAL}`;
     document.getElementById('cardDate').textContent = lastDate;
     document.getElementById('cardPayment').textContent = fmt(stdPayment);
-    document.getElementById('cardPaymentSub').textContent = `งวดสุดท้าย ${fmt(lastPay)}`;
+    document.getElementById('cardPaymentSub').textContent = `Final Pmt ${fmt(lastPay)}`;
     document.getElementById('cardPct').textContent = pct.toFixed(1) + '%';
-    document.getElementById('cardRemain').textContent = `${remPeriods} งวด`;
-    document.getElementById('cardDue').textContent = `ครบกำหนดประมาณ ~${remPeriods} เดือน`;
-    if(firstDate && firstDate !== '—') document.getElementById('timelineStart').textContent = `เริ่ม ${firstDate}`;
+    document.getElementById('cardRemain').textContent = `${remPeriods} Periods`;
+    document.getElementById('cardDue').textContent = `Due in approx. ~${remPeriods} months`;
+    if(firstDate && firstDate !== '—') document.getElementById('timelineStart').textContent = `Started ${firstDate}`;
 
     animCount(document.getElementById('paidNum'), amtPaid, 1400);
     animCount(document.getElementById('remainNum'), balances[paid], 1400);
@@ -479,12 +470,12 @@ async function load() {
     dynamicItems.forEach(item => item.remove());
 
     setTimeout(()=>{ document.getElementById('milestoneFill').style.width = pct+'%'; }, 200);
-    [{pct:0,label:'เริ่มต้น',sub:`งวด 1`,below:true},{pct:25,label:'25%',sub:`งวด ${Math.round(TOTAL*.25)}`,below:false},{pct:50,label:'50%',sub:`งวด ${Math.round(TOTAL*.5)}`,below:true},{pct:75,label:'75%',sub:`งวด ${Math.round(TOTAL*.75)}`,below:false},{pct:100,label:'ปลดหนี้',sub:`งวด ${TOTAL}`,below:true}].forEach(m=>{
+    [{pct:0,label:'Start',sub:`Period 1`,below:true},{pct:25,label:'25%',sub:`Period ${Math.round(TOTAL*.25)}`,below:false},{pct:50,label:'50%',sub:`Period ${Math.round(TOTAL*.5)}`,below:true},{pct:75,label:'75%',sub:`Period ${Math.round(TOTAL*.75)}`,below:false},{pct:100,label:'Debt Free',sub:`Period ${TOTAL}`,below:true}].forEach(m=>{
       const pt=document.createElement('div'); pt.className='milestone-pt'+(m.pct<=pct?' done':''); pt.style.left=m.pct+'%'; track.appendChild(pt);
       const lb=document.createElement('div'); lb.className='milestone-label'+(m.below?' below':''); lb.style.left=m.pct+'%'; lb.innerHTML=`<span class="pct">${m.label}</span>${m.sub}`; track.appendChild(lb);
     });
     const np=document.createElement('div'); np.className='milestone-pt now'; np.style.left=pct+'%'; track.appendChild(np);
-    const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-50px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">ปัจจุบัน</span>งวด ${paid}`; track.appendChild(nl);
+    const nl=document.createElement('div'); nl.className='milestone-label'; nl.style.left=pct+'%'; nl.style.top='-50px'; nl.innerHTML=`<span class="pct" style="color:var(--orange)">Current</span>Period ${paid}`; track.appendChild(nl);
 
     buildChart(balances, paid, TOTAL, price, dates, paidStatus, payments);
 
@@ -497,7 +488,7 @@ async function load() {
       const bal = balances[period];
       const tr=document.createElement('tr');
       if(isCurr) { tr.className='current-row'; currentRowElement = tr; }
-      const badge = isCurr ? `<span class="badge current">งวดล่าสุด</span>` : isPaid ? `<span class="badge paid">✅ จ่ายแล้ว</span>` : `<span class="badge upcoming">รออยู่</span>`;
+      const badge = isCurr ? `<span class="badge current">Latest</span>` : isPaid ? `<span class="badge paid">✅ Paid</span>` : `<span class="badge upcoming">Pending</span>`;
       tr.innerHTML=`<td>${period}</td><td>${dates[idx]||'—'}</td><td>${fmt(payments[idx])}</td><td>${fmt(bal)}</td><td>${badge}</td>`;
       tbody.appendChild(tr);
     }
@@ -510,7 +501,7 @@ async function load() {
     }
 
   } catch(e) {
-    document.getElementById('loadingState').innerHTML = `<div style="color:#FF8A4D;font-size:14px">⚠️ ดึงข้อมูลไม่ได้</div><div style="margin-top:8px;font-size:12px;color:var(--text-low)">${e.message}</div>`;
+    document.getElementById('loadingState').innerHTML = `<div style="color:#FF8A4D;font-size:14px">⚠️ Failed to load data</div><div style="margin-top:8px;font-size:12px;color:var(--text-low)">${e.message}</div>`;
   }
 }
 
@@ -530,113 +521,62 @@ function buildChart(balances, paid, total, price, dates, paidStatus, payments) {
   for(let i=0;i<=total;i+=10){
     const x=xF(i);
     s+=`<line x1="${x}" y1="${pT}" x2="${x}" y2="${H-pB}" stroke="rgba(255,255,255,.04)" stroke-width="1"/>`;
-    s+=`<text x="${x}" y="${H-pB+18}" text-anchor="middle" font-family="Space Grotesk" font-size="11" fill="#4B5263">${i===0?'เริ่ม':i}</text>`;
+    s+=`<text x="${x}" y="${H-pB+18}" text-anchor="middle" font-family="Space Grotesk" font-size="11" fill="#4B5263">${i===0?'Start':i}</text>`;
   }
   let full=`M ${xF(0)} ${yF(balances[0])}`;
   for(let i=1;i<=total;i++) full+=` L ${xF(i)} ${yF(balances[i])}`;
   s+=`<path d="${full} L ${xF(total)} ${H-pB} L ${xF(0)} ${H-pB} Z" fill="url(#aG)"/>`;
+  
   let paidP=`M ${xF(0)} ${yF(balances[0])}`;
   for(let i=1;i<=paid;i++) paidP+=` L ${xF(i)} ${yF(balances[i])}`;
+  s+=`<path d="${paidP}" fill="none" stroke="url(#lG)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>`;
+
   let projP=`M ${xF(paid)} ${yF(balances[paid])}`;
   for(let i=paid+1;i<=total;i++) projP+=` L ${xF(i)} ${yF(balances[i])}`;
-  s+=`<path d="${projP}" fill="none" stroke="#FF8A4D" stroke-width="3" stroke-dasharray="6 5" opacity=".6"/>`;
-  s+=`<path d="${paidP}" fill="none" stroke="#4DE8FF" stroke-width="9" opacity=".18"/>`;
-  s+=`<path d="${paidP}" fill="none" stroke="url(#lG)" stroke-width="3.5" stroke-dasharray="10 6" style="animation: chartDashRun 1s linear infinite;"/>`;
+  s+=`<path d="${projP}" fill="none" stroke="#FF8A4D" stroke-width="2" stroke-dasharray="6,6" opacity="0.7"/>`;
   
-  for(let i=0;i<=total;i++){
-    const x=xF(i),y=yF(balances[i]),isCurr=(i===paid),isPaid=(i<=paid);
-    if(i%5===0||isCurr||i===total){
-      const col=isCurr?'#FF8A4D':(isPaid?'#4DFFB0':'#5A6678');
-      s+=`<circle cx="${x}" cy="${y}" r="${isCurr?6:4}" fill="${col}" stroke="#0A0E16" stroke-width="2"/>`;
-      if(isCurr){ s+=`<circle cx="${x}" cy="${y}" r="11" fill="none" stroke="#FF8A4D" stroke-width="1.5" opacity=".5"/>`; s+=`<text x="${x}" y="${y-18}" text-anchor="middle" font-family="Space Grotesk" font-weight="600" font-size="12" fill="#F2F4F8">วันนี้</text>`; }
-    }
-    const dl=dates[i-1]||(i===0?'เริ่มต้น':'คาดการณ์');
-    s+=`<circle class="ht" data-i="${i}" data-bal="${balances[i]}" data-date="${dl}" data-paid="${isPaid}" cx="${x}" cy="${y}" r="10" fill="transparent" style="cursor:pointer"/>`;
+  for(let i=0;i<=total;i++) {
+     const cx = xF(i), cy = yF(balances[i]);
+     const color = i <= paid ? '#4DFFB0' : '#FF8A4D';
+     s+=`<circle cx="${cx}" cy="${cy}" r="4" fill="${color}" stroke="#05070C" stroke-width="2" style="cursor:pointer"
+         onmouseenter="showTooltip(event, ${i}, ${balances[i]}, '${dates[i-1]||'-'}')" onmouseleave="hideTooltip()" />`;
   }
-  svg.innerHTML=s;
-  const tip=document.getElementById('hoverTooltip'), wrap=document.querySelector('.chart-svg-wrap');
-  svg.querySelectorAll('.ht').forEach(t=>{
-    t.addEventListener('mouseenter',()=>{
-      const i=t.getAttribute('data-i'), bal=parseFloat(t.getAttribute('data-bal')), date=t.getAttribute('data-date'), isPaid=t.getAttribute('data-paid')==='true';
-      const sr=svg.getBoundingClientRect(), wr=wrap.getBoundingClientRect();
-      const sx=sr.width/W, sy=sr.height/H, cx=parseFloat(t.getAttribute('cx')), cy=parseFloat(t.getAttribute('cy'));
-      tip.innerHTML=`<div class="tt-period">งวด ${i} · ${date}</div><div class="tt-val">${fmt(bal)}</div><div class="tt-period">${isPaid?'จ่ายแล้ว':'คาดการณ์'}</div>`;
-      tip.style.left=(sr.left-wr.left+cx*sx)+'px'; tip.style.top=(sr.top-wr.top+cy*sy)+'px'; tip.style.opacity='1';
-    });
-    t.addEventListener('mouseleave',()=>{ tip.style.opacity='0'; });
-  });
-}
-
-const overlay = document.getElementById('drawerOverlay');
-const drawer = document.getElementById('inputDrawer');
-
-document.getElementById('btnOpenDrawer').addEventListener('click', () => {
-  document.getElementById('formPeriod').value = `งวดที่ ${globalNextPeriod}`;
-  document.getElementById('formAmount').value = globalStdPayment;
-  document.getElementById('formDate').value = new Date().toISOString().substring(0, 10);
-  overlay.classList.add('open');
-  drawer.classList.add('open');
-});
-
-function closeDrawer() {
-  overlay.classList.remove('open');
-  drawer.classList.remove('open');
-}
-overlay.addEventListener('click', closeDrawer);
-document.getElementById('btnCloseDrawer').addEventListener('click', closeDrawer);
-
-// 🚀 ระบบส่งข้อมูลแบบ JSONP (แก้ปัญหา Failed to fetch จาก CORS ชัวร์ 100%)
-document.getElementById('paymentForm').addEventListener('submit', function(e) {
-  e.preventDefault();
   
-  const submitBtn = document.getElementById('btnSubmitForm');
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = `<div class="spinner" style="width:18px;height:18px;margin:0"></div> บันทึกข้อมูล...`;
+  svg.innerHTML = s;
+}
 
-  const period = globalNextPeriod;
-  const amount = parseFloat(document.getElementById('formAmount').value);
-  const date = document.getElementById('formDate').value;
+function showTooltip(e, period, balance, dateStr) {
+  const tt = document.getElementById('hoverTooltip');
+  tt.innerHTML = `<div class="tt-period">Period ${period}</div><div class="tt-val">฿${balance.toLocaleString('en-US')}</div>`;
+  tt.style.left = e.pageX + 'px';
+  tt.style.top = e.pageY + 'px';
+  tt.style.opacity = 1;
+}
 
-  const callbackName = 'jsonp_' + Math.round(Math.random() * 1000000);
-  const saveUrl = `${API}?action=savePayment&period=${period}&amount=${amount}&date=${date}&callback=${callbackName}`;
+function hideTooltip() {
+  const tt = document.getElementById('hoverTooltip');
+  tt.style.opacity = 0;
+}
 
-  window[callbackName] = function(resData) {
-    if (resData.status === 'success') {
-      submitBtn.style.background = 'var(--green)';
-      submitBtn.innerHTML = `✅ บันทึกสำเร็จ!`;
-      setTimeout(() => {
-        closeDrawer();
-        submitBtn.disabled = false;
-        submitBtn.style.background = '';
-        submitBtn.innerHTML = '<span>ส่งข้อมูลอัปเดต</span>';
-        
-        document.getElementById('mainContent').style.display = 'none';
-        document.getElementById('loadingState').style.display = 'block';
-        load();
-      }, 1500);
-    } else {
-      alert('เกิดข้อผิดพลาดจากเซิร์ฟเวอร์: ' + resData.message);
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<span>ลองอีกครั้ง</span>';
-    }
-    document.body.removeChild(script);
-    delete window[callbackName];
-  };
-
-  const script = document.createElement('script');
-  script.src = saveUrl;
-  script.onerror = function() {
-    alert('เชื่อมต่อไม่สำเร็จ! กรุณาตรวจสอบว่าคุณอัปเดตและ Deploy ตัวฝั่ง Google Apps Script เรียบร้อยแล้วหรือยัง');
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<span>ลองอีกครั้ง</span>';
-    document.body.removeChild(script);
-    delete window[callbackName];
-  };
-  document.body.appendChild(script);
+// Drawer Overlay logic
+document.getElementById('btnOpenDrawer')?.addEventListener('click', () => {
+  document.getElementById('formPeriod').value = globalNextPeriod;
+  document.getElementById('formAmount').value = globalStdPayment;
+  document.getElementById('formDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('drawerOverlay').classList.add('open');
+  document.getElementById('inputDrawer').classList.add('open');
 });
 
+const closeDrawer = () => {
+  document.getElementById('drawerOverlay').classList.remove('open');
+  document.getElementById('inputDrawer').classList.remove('open');
+};
+
+document.getElementById('btnCloseDrawer')?.addEventListener('click', closeDrawer);
+document.getElementById('drawerOverlay')?.addEventListener('click', closeDrawer);
+
+// Init load
 load();
-setInterval(load, 5*60*1000);
 </script>
 </body>
 </html>
