@@ -331,27 +331,29 @@ const fmt = n => '฿' + Math.round(n).toLocaleString('en-US');
 
 function formatDate(dateStr) {
   if (!dateStr || dateStr.toString().trim() === '' || dateStr === '—') return '—';
+  
   try {
     let s = dateStr.toString().trim();
-    if (s.includes('T')) s = s.split('T')[0];
-    
-    // แยกส่วน ปี-เดือน-วัน ออกมาตรงๆ เพื่อป้องกันปัญหาเรื่องเขตเวลา (Timezone Displacement)
-    const parts = s.split('-');
-    let targetDate;
-    
-    if (parts.length === 3) {
-      // สร้าง Date Object โดยระบุเวลาให้อยู่ในช่วงกลางวันเพื่อไม่ให้ Timezone ดึงข้ามวัน
-      targetDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 12, 0, 0);
-    } else {
-      targetDate = new Date(s);
-      // หากเกิดกรณีดึงข้อมูลดิบมาแล้วเวลาเพี้ยน ให้ตั้งเวลาเป็นเที่ยงวัน
-      if (!isNaN(targetDate.getTime())) {
-        targetDate.setHours(12, 0, 0, 0);
+    if (s.includes('T')) s = s.split('T')[0]; // ตัดส่วนที่เป็นเวลาออกถ้ามี
+
+    // กรณีที่ 1: ถ้า Google Sheets ส่งมาเป็นฟอร์แมต วัน/เดือน/ปี ค.ศ. (เช่น 25/06/2026 หรือ 25-06-2026)
+    if (s.includes('/') && s.split('/')[0].length <= 2) {
+      const parts = s.split('/');
+      return convertToShortMonth(parts[2], parts[1], parts[0]);
+    }
+
+    // กรณีที่ 2: ถ้าส่งมาเป็นฟอร์แมต ปี-เดือน-วัน (เช่น 2026-06-25)
+    if (s.includes('-')) {
+      const parts = s.split('-');
+      if (parts[0].length === 4) { // เช็กว่าเป็นปีขึ้นก่อน
+        return convertToShortMonth(parts[0], parts[1], parts[2]);
       }
     }
     
+    // กรณีที่ 3: หากหลุดไปเป็นแบบอื่น ให้ใช้ตัวแปลงมาตรฐานแต่ล็อก Timezone ให้ปลอดภัย
+    const targetDate = new Date(s);
     if (!isNaN(targetDate.getTime())) {
-      // บังคับการแสดงผลให้ใช้ Timezone ของประเทศไทย (Asia/Bangkok) ชัวร์ที่สุด
+      targetDate.setHours(12, 0, 0, 0); // ตั้งเวลาเที่ยงวันเพื่อดันไม่ให้วันย้อนกลับ
       return targetDate.toLocaleDateString('en-GB', { 
         day: 'numeric', 
         month: 'short', 
@@ -363,6 +365,17 @@ function formatDate(dateStr) {
   } catch(e) { 
     return dateStr; 
   }
+}
+
+// ฟังก์ชันช่วยแปลงเลขเดือนเป็นชื่อย่อภาษาอังกฤษ (เช่น 06 -> Jun)
+function convertToShortMonth(year, month, day) {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const mIdx = parseInt(month, 10) - 1;
+  const d = parseInt(day, 10);
+  if (mIdx >= 0 && mIdx < 12 && !isNaN(d)) {
+    return `${d} ${months[mIdx]} ${year}`;
+  }
+  return `${day}/${month}/${year}`;
 }
 
 function animCount(el, target, ms, pre='฿') {
