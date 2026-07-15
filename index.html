@@ -424,7 +424,16 @@ async function load() {
     const payments = [];
     for(let i=1; i<=TOTAL; i++) payments.push(parseFloat(r[2]?.[i]) || stdPayment);
     const dates = [];
-    for(let i=1; i<=TOTAL; i++) dates.push(formatDate(r[8]?.[i]));
+    for(let i=1; i<=TOTAL; i++) {
+    let rawDate = r[8]?.[i];
+    if (rawDate && !isNaN(Date.parse(rawDate))) {
+    let dObj = new Date(rawDate);
+    // บังคับ Timezone เป็นกรุงเทพฯ ป้องกันวันที่ลดลง 1 วัน
+    dates.push(dObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' }));
+  } else {
+    dates.push(formatDate(rawDate));
+  }
+}
     const balances = [price];
     for(let i=1; i<=TOTAL; i++) balances.push(Math.max(price - payments.slice(0,i).reduce((a,b)=>a+b,0), 0));
 
