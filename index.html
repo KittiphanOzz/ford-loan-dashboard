@@ -334,14 +334,35 @@ function formatDate(dateStr) {
   try {
     let s = dateStr.toString().trim();
     if (s.includes('T')) s = s.split('T')[0];
+    
+    // แยกส่วน ปี-เดือน-วัน ออกมาตรงๆ เพื่อป้องกันปัญหาเรื่องเขตเวลา (Timezone Displacement)
     const parts = s.split('-');
+    let targetDate;
+    
     if (parts.length === 3) {
-      return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      // สร้าง Date Object โดยระบุเวลาให้อยู่ในช่วงกลางวันเพื่อไม่ให้ Timezone ดึงข้ามวัน
+      targetDate = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]), 12, 0, 0);
+    } else {
+      targetDate = new Date(s);
+      // หากเกิดกรณีดึงข้อมูลดิบมาแล้วเวลาเพี้ยน ให้ตั้งเวลาเป็นเที่ยงวัน
+      if (!isNaN(targetDate.getTime())) {
+        targetDate.setHours(12, 0, 0, 0);
+      }
     }
-    const d2 = new Date(s);
-    if (!isNaN(d2.getTime())) return d2.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    
+    if (!isNaN(targetDate.getTime())) {
+      // บังคับการแสดงผลให้ใช้ Timezone ของประเทศไทย (Asia/Bangkok) ชัวร์ที่สุด
+      return targetDate.toLocaleDateString('en-GB', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric',
+        timeZone: 'Asia/Bangkok'
+      });
+    }
     return s;
-  } catch(e) { return dateStr; }
+  } catch(e) { 
+    return dateStr; 
+  }
 }
 
 function animCount(el, target, ms, pre='฿') {
