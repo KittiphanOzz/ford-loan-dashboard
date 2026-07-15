@@ -335,19 +335,18 @@ function formatDate(dateStr) {
   try {
     let s = dateStr.toString().trim();
     
-    // 1. ถ้ามีตัว T หรือข้อมูลเวลาติดมา (เช่นมาจาก ISO String) ให้ตัดเอาเฉพาะวันที่
+    // 1. ถ้ามีตัว T หรือข้อมูลเวลาติดมา ให้ตัดเอาเฉพาะวันที่
     if (s.includes('T')) s = s.split('T')[0];
 
-    // 2. จัดการกับฟอร์แมต วัน/เดือน/ปี (เช่น 25/02/2026 หรือ 27/05/2026)
+    // 2. จัดการฟอร์แมต วัน/เดือน/ปี (เช่น 25/06/2026)
     if (s.includes('/')) {
       const parts = s.split('/');
-      // เช็กว่าตัวแรกเป็น วัน (เลขไม่เกิน 2 หลัก)
       if (parts[0].length <= 2) {
         return convertToShortMonth(parts[2], parts[1], parts[0]);
       }
     }
 
-    // 3. จัดการกับฟอร์แมต ปี-เดือน-วัน (เช่น 2026-05-27)
+    // 3. จัดการฟอร์แมต ปี-เดือน-วัน (เช่น 2026-06-25)
     if (s.includes('-')) {
       const parts = s.split('-');
       if (parts[0].length === 4) {
@@ -355,13 +354,11 @@ function formatDate(dateStr) {
       }
     }
     
-    // 4. ตัวแปลงสำรอง (ในกรณีที่หลุดมาเป็น Date Object ยาวๆ) 
-    // เราจะบวกเวลาเพิ่มเข้าไป 12 ชั่วโมงเพื่อดึงวันไม่ให้ถอยหลัง
+    // 4. ระบบป้องกันการลดวันจาก Timezone (ถ้าหลุดมาเป็น Date Object)
     const targetDate = new Date(s);
     if (!isNaN(targetDate.getTime())) {
-      // ตรวจสอบว่าถ้าชั่วโมงเป็น 00:00 (เที่ยงคืน) ให้ปรับเป็นเที่ยงวันป้องกันวันย้อนหลัง
       if (targetDate.getHours() === 0) {
-        targetDate.setHours(12, 0, 0, 0);
+        targetDate.setHours(12, 0, 0, 0); // ดันเวลาไปเที่ยงวัน วันจะได้ไม่ถอยหลัง
       }
       return targetDate.toLocaleDateString('en-GB', { 
         day: 'numeric', 
